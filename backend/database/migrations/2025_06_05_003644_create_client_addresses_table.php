@@ -24,6 +24,8 @@ return new class extends Migration
             $table->string('complement', 100)->nullable();
             $table->boolean('is_primary');
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
