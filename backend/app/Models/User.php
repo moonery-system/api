@@ -43,7 +43,8 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
     ];
 
-    public function role(){
+    public function roles()
+    {
         return $this->belongsToMany(Role::class, 'user_roles');
     }
 
@@ -55,5 +56,18 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function hasPermission($permission)
+    {
+        if (!isset($this->permissionsCache)) {
+            $this->permissionsCache = $this->roles()
+                ->with('permissions')
+                ->get()
+                ->flatMap(fn($role) => $role->permissions->pluck('permission'))
+                ->unique();
+        }
+
+        return $this->permissionsCache->contains($permission);
     }
 }
