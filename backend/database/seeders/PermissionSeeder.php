@@ -17,13 +17,19 @@ class PermissionSeeder extends Seeder
     {
         $permissions = [
             [
-                'permission' => '[deliveries.create]'
+                'permission' => 'users.create'
             ],
             [
-                'permission' => '[deliveries.update]'
+                'permission' => 'users.update'
             ],
             [
-                'permission' => '[deliveries.delete]'
+                'permission' => 'users.delete'
+            ],
+            [
+                'permission' => 'users.view'
+            ],
+            [
+                'permission' => 'users.viewAny'
             ]
         ];
 
