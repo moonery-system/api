@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Utils\ApiResponse;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -21,6 +22,10 @@ class AuthController extends Controller
 
         $email = $request->email;
         $password = $request->password;
+
+        $user = User::where('email', $email)->first();
+
+        if (!$user->activated_at) return ApiResponse::unauthorized(); 
 
         $attempt = JWTAuth::attempt([
             'email' => $email,

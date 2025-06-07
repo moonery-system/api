@@ -38,6 +38,13 @@ class UserController extends Controller
             $role->users()->attach($user->id);
         }
 
+        $invite = new Invite();
+
+        $invite->token = Str::random(60);
+        $invite->user_id = $user->id;
+        $invite->expires_at = Carbon::now()->addHour();
+        $invite->save();
+
         return ApiResponse::success($user);
     }
 

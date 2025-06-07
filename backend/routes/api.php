@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InviteController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login']);
+    
+    Route::get('/invite', [InviteController::class,'validateToken']);
 });
     
 Route::middleware('auth:api')->group(function () {
