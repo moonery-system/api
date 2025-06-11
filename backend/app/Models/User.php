@@ -70,7 +70,7 @@ class User extends Authenticatable implements JWTSubject
         return $this->permissionsCache->contains($permission);
     }
 
-    public function clienteAdress()
+    public function clientAddress()
     {
         return $this->hasMany(ClientAddress::class);
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AddressRequest;
 use App\Http\Requests\UserRequest;
 use App\Models\Role;
+use App\Models\User;
 use App\Services\ClientService;
 use App\Services\UserService;
 use App\Utils\ApiResponse;
@@ -16,21 +17,22 @@ class ClientController extends Controller
 
     public function index()
     {
-        //
+        $clients = $this->clientService->getAllClients();
+
+        return ApiResponse::success($clients);
     }
 
     public function store(UserRequest $userRequest, AddressRequest $addressRequest)
     {
-
         $userValidated = $userRequest->validated();
         $addressValidated = $addressRequest->validated();
 
-        $clientRole = $this->userService->getClientRoleId();
+        $clientRoleId = $this->userService->getRoleIdByName('Client');
 
         $user = $this->userService->createUserWithInvite(
             $userValidated['name'],
             $userValidated['email'],
-            $clientRole->id
+            $clientRoleId
         );
 
         $address = [
@@ -49,7 +51,11 @@ class ClientController extends Controller
 
     public function show($id)
     {
-        //
+        $client = $this->clientService->getClient($id);
+
+        if (!$client) return ApiResponse::notFound();
+
+        return ApiResponse::success($client);
     }
 
     public function update(Request $request, $id)
@@ -59,6 +65,12 @@ class ClientController extends Controller
 
     public function destroy($id)
     {
-        //
+        $client = $this->clientService->getClient($id);
+
+        if (!$client) return ApiResponse::notFound();
+
+        $this->clientService->deleteClient($client);
+
+        return ApiResponse::success();
     }
 }

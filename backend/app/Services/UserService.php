@@ -25,8 +25,16 @@ class UserService
         return $user;
     }
 
-    public function getClientRoleId()
+    public function deleteUser($userId)
     {
-        return Role::where('name', 'Client')->firstOrFail()->id;
+        $user = User::find($userId);
+        if (!$user) throw new \Exception("User not found");
+
+        $user->delete();
+    }
+
+    public function getRoleIdByName($roleName)
+    {
+        return Role::where('name', $roleName)->firstOrFail()->id;
     }
 }

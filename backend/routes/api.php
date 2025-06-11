@@ -25,10 +25,14 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/users', 'store')->middleware('can:users.create');
         Route::get('/users/{id}', 'show')->middleware('can:users.view');
         Route::put('/users/{id}', 'update')->middleware('can:users.update');
-        Route::delete('/users/{id}', 'delete')->middleware('can:users.delete');
+        Route::delete('/users/{id}', 'destroy')->middleware('can:users.delete');
     });
 
     Route::controller(ClientController::class)->group(function () {
+        Route::get('/clients', 'index')->middleware('can:clients.viewAny');
         Route::post('/clients', 'store')->middleware('can:clients.create');
+        Route::get('/clients/{id}', 'show')->middleware('can:clients.view');
+        Route::put('/clients/{id}', 'update')->middleware('can:clients.update');
+        Route::delete('/clients/{id}', 'destroy')->middleware('can:clients.delete');
     });
 });
