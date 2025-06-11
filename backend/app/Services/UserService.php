@@ -24,4 +24,9 @@ class UserService
 
         return $user;
     }
+
+    public function getClientRoleId()
+    {
+        return Role::where('name', 'Client')->firstOrFail()->id;
+    }
 }

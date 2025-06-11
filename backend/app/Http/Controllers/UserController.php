@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
 use App\Models\Invite;
 use App\Models\Role;
 use App\Models\User;
@@ -20,17 +21,14 @@ class UserController extends Controller
         return ApiResponse::success($users);
     }
 
-    public function store(Request $request)
+    public function store(UserRequest $userRequest)
     {
-        $validated = $request->validate([
-            'name' => 'required|max:255|min:1',
-            'email' => 'required|email|unique:users,email'
-        ]);
+        $userValidated = $userRequest->validated();
         
         $user = $this->userService->createUserWithInvite(
-            $validated['name'],
-            $validated['email'],
-            $request->role_id
+            $userValidated['name'],
+            $userValidated['email'],
+            $userValidated['role_id'] ?? null
         );
 
         return ApiResponse::success($user);

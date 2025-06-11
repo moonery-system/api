@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddressRequest;
+use App\Http\Requests\UserRequest;
 use App\Models\Role;
 use App\Services\ClientService;
 use App\Services\UserService;
@@ -17,34 +19,27 @@ class ClientController extends Controller
         //
     }
 
-    public function store(Request $request)
+    public function store(UserRequest $userRequest, AddressRequest $addressRequest)
     {
-        $validated = $request->validate([
-            'name' => 'required|max:255|min:1',
-            'email' => 'required|email|unique:users,email',
-            'address_line' => 'required|max:255',
-            'neighborhood' => 'required|max:255',
-            'city' => 'required|max:255',
-            'state' => 'required|max:255',
-            'zip_code' => 'required|max:255',
-            'complement' => 'max:255',
-        ]);
 
-        $clientRole = Role::where('name', 'Client')->firstOrFail();
+        $userValidated = $userRequest->validated();
+        $addressValidated = $addressRequest->validated();
+
+        $clientRole = $this->userService->getClientRoleId();
 
         $user = $this->userService->createUserWithInvite(
-            $validated['name'],
-            $validated['email'],
+            $userValidated['name'],
+            $userValidated['email'],
             $clientRole->id
         );
 
         $address = [
-            'address_line' => $validated['address_line'],
-            'neighborhood' => $validated['neighborhood'],
-            'city' => $validated['city'],
-            'state' => $validated['state'],
-            'zip_code' => $validated['zip_code'],
-            'complement' => $validated['complement'],
+            'address_line' => $addressValidated['address_line'],
+            'neighborhood' => $addressValidated['neighborhood'],
+            'city' => $addressValidated['city'],
+            'state' => $addressValidated['state'],
+            'zip_code' => $addressValidated['zip_code'],
+            'complement' => $addressValidated['complement'],
         ];
 
         $this->clientService->createClientAddress($user->id, $address);
