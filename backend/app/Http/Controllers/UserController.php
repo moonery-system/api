@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Invite;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\UserService;
 use App\Utils\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Str;
 
 class UserController extends Controller
 {
+    public function __construct(private UserService $userService){}
+
     public function index()
     {
         $users = User::all();
@@ -20,30 +22,16 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|max:255|min:1',
             'email' => 'required|email|unique:users,email'
         ]);
-
-        $name = $request->name;
-        $email = $request->email;
-        $role = Role::find($request->role_id);
-
-        $user = new User();
-        $user->name = $name;
-        $user->email = $email;
-        $user->save();
-
-        if ($role) {
-            $role->users()->attach($user->id);
-        }
-
-        $invite = new Invite();
-
-        $invite->token = Str::random(60);
-        $invite->user_id = $user->id;
-        $invite->expires_at = Carbon::now()->addHour();
-        $invite->save();
+        
+        $user = $this->userService->createUserWithInvite(
+            $validated['name'],
+            $validated['email'],
+            $request->role_id
+        );
 
         return ApiResponse::success($user);
     }
