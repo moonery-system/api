@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -25,5 +26,9 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/users/{id}', 'show')->middleware('can:users.view');
         Route::put('/users/{id}', 'update')->middleware('can:users.update');
         Route::delete('/users/{id}', 'delete')->middleware('can:users.delete');
+    });
+
+    Route::controller(ClientController::class)->group(function () {
+        Route::post('/clients', 'store')->middleware('can:clients.create');
     });
 });
