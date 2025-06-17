@@ -4,17 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Utils\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
-        $request->validate([
+        $request->validate(rules: [
             'email' => 'required|email',
             'password' => 'required'
-        ], [
+        ], params: [
             'email.required' => 'The email is required.',
             'email.email' => 'The email must be a valid email.',
             'password.required' => 'The password is required.'
@@ -25,7 +26,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $email)->first();
 
-        if (!$user->activated_at) return ApiResponse::unauthorized(); 
+        if (!$user->activated_at) return ApiResponse::unauthorized();
 
         $attempt = JWTAuth::attempt([
             'email' => $email,
@@ -33,20 +34,20 @@ class AuthController extends Controller
         ]);
 
         if (!$attempt)
-            return ApiResponse::unauthorized('Invalid Credentials');
+            return ApiResponse::unauthorized(message: 'Invalid Credentials');
 
-        return ApiResponse::success($attempt);
+        return ApiResponse::success(data: $attempt);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         auth()->logout();
         return ApiResponse::success();
     }
 
-    public function user()
+    public function user(): JsonResponse
     {
         $user = auth()->user();
-        return ApiResponse::success($user);
+        return ApiResponse::success(data: $user);
     }
 }

@@ -3,73 +3,58 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddressRequest;
-use App\Http\Requests\UserRequest;
-use App\Models\Role;
-use App\Models\User;
+use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
 use App\Services\ClientService;
 use App\Services\UserService;
 use App\Utils\ApiResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class ClientController extends Controller
 {
     public function __construct(private UserService $userService, private ClientService $clientService) {}
 
-    public function index()
+    public function index(): JsonResponse
     {
         $clients = $this->clientService->getAllClients();
 
-        return ApiResponse::success($clients);
+        return ApiResponse::success(data: $clients);
     }
 
-    public function store(UserRequest $userRequest, AddressRequest $addressRequest)
+    public function store(UserStoreRequest $userRequest, AddressRequest $addressRequest): JsonResponse
     {
         $userValidated = $userRequest->validated();
         $addressValidated = $addressRequest->validated();
 
-        $clientRoleId = $this->userService->getRoleIdByName('Client');
+        $user = $this->clientService->createClient(userValidated: $userValidated, addressValidated: $addressValidated);
 
-        $user = $this->userService->createUserWithInvite(
-            $userValidated['name'],
-            $userValidated['email'],
-            $clientRoleId
-        );
-
-        $address = [
-            'address_line' => $addressValidated['address_line'],
-            'neighborhood' => $addressValidated['neighborhood'],
-            'city' => $addressValidated['city'],
-            'state' => $addressValidated['state'],
-            'zip_code' => $addressValidated['zip_code'],
-            'complement' => $addressValidated['complement'],
-        ];
-
-        $this->clientService->createClientAddress($user->id, $address);
-
-        return ApiResponse::success($user);
+        return ApiResponse::success(data: $user);
     }
 
-    public function show($id)
+    public function show($id): JsonResponse
     {
-        $client = $this->clientService->getClient($id);
+        $client = $this->clientService->getClientById(userId: $id);
 
         if (!$client) return ApiResponse::notFound();
 
-        return ApiResponse::success($client);
+        return ApiResponse::success(data: $client);
     }
 
-    public function update(Request $request, $id)
+    public function update(UserUpdateRequest $request, $id): JsonResponse
     {
-        //
+        $validated = $request->validated();
+        $clientUpdated = $this->clientService->updateClient(userId: $id, data: $validated);
+
+        return $clientUpdated ? ApiResponse::success(data: $clientUpdated) : ApiResponse::notFound();
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
-        $client = $this->clientService->getClient($id);
+        $client = $this->clientService->getClientById(userId: $id);
 
         if (!$client) return ApiResponse::notFound();
 
-        $this->clientService->deleteClient($client);
+        $this->clientService->deleteClient(client: $client);
 
         return ApiResponse::success();
     }

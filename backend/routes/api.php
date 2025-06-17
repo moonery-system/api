@@ -8,10 +8,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login']);
-    
-    Route::get('/invite', [InviteController::class,'validateToken']);
+
+    Route::controller(InviteController::class)->group(function () {
+        Route::get('/invite', 'validateToken');
+        Route::post('/invite', 'store');
+    });
+
+    Route::post('/changePassword', [UserController::class, 'changePassword']);
 });
-    
+
 Route::middleware('auth:api')->group(function () {
     Route::prefix('/auth')
         ->controller(AuthController::class)
@@ -20,6 +25,7 @@ Route::middleware('auth:api')->group(function () {
             Route::post('/logout', 'logout');
         });
 
+    //users routes
     Route::controller(UserController::class)->group(function () {
         Route::get('/users', 'index')->middleware('can:users.viewAny');
         Route::post('/users', 'store')->middleware('can:users.create');
@@ -28,6 +34,7 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/users/{id}', 'destroy')->middleware('can:users.delete');
     });
 
+    //clients routes
     Route::controller(ClientController::class)->group(function () {
         Route::get('/clients', 'index')->middleware('can:clients.viewAny');
         Route::post('/clients', 'store')->middleware('can:clients.create');

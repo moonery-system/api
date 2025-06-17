@@ -2,60 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserRequest;
-use App\Models\Invite;
-use App\Models\Role;
-use App\Models\User;
+use App\Http\Requests\ChangePasswordRequest;
+use App\Http\Requests\UserStoreRequest;
+use App\Http\Requests\UserUpdateRequest;
+use App\Repositories\UserRepository;
 use App\Services\UserService;
 use App\Utils\ApiResponse;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
-    public function __construct(private UserService $userService){}
+    public function __construct(
+        private UserService $userService,
+        private UserRepository $userRepository
+        ){}
 
-    public function index()
+    public function index(): JsonResponse
     {
-        $users = User::all();
-        return ApiResponse::success($users);
+        $users = $this->userService->getAllUsers();
+        return ApiResponse::success(data: $users);
     }
 
-    public function store(UserRequest $userRequest)
+    public function store(UserStoreRequest $userRequest): JsonResponse
     {
         $userValidated = $userRequest->validated();
         
         $user = $this->userService->createUserWithInvite(
-            $userValidated['name'],
-            $userValidated['email'],
-            $userValidated['role_id'] ?? null
+            name: $userValidated['name'],
+            email: $userValidated['email'],
+            roleId: $userValidated['role_id'] ?? null
         );
 
-        return ApiResponse::success($user);
+        return ApiResponse::success(data: $user);
     }
 
-    public function show($id)
+    public function show($id): JsonResponse
     {
-        $user = User::find($id);
-        if(!$user) return ApiResponse::notFound();
-
-        return ApiResponse::success($user);
+        $user = $this->userRepository->findById(id: $id);
+        return $user ? ApiResponse::success(data: $user) : ApiResponse::notFound();
     }
 
-    public function update(Request $request, $id)
+    public function update(UserUpdateRequest $request, $id): JsonResponse
     {
-        $user = User::find($id);
-        if(!$user) return ApiResponse::notFound();
+        $validated = $request->validated();
+        $userUpdated = $this->userService->updateUser(id: $id, data: $validated);
 
-        //
-
-        return true;
+        return $userUpdated ? ApiResponse::success(data: $userUpdated) : ApiResponse::notFound();
     }
 
-    public function destroy($id)
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
-        $this->userService->deleteUser($id);
+        $token = $request->query('token');
+        $validated = $request->validated();
+        $passwordChanged = $this->userService->changePassword(data: $validated, token: $token);
 
-        return ApiResponse::success();
+        return $passwordChanged ? ApiResponse::success() : ApiResponse::notFound();
+    }
+
+    public function destroy($id): JsonResponse
+    {
+        $userDeleted = $this->userService->deleteUser(userId: $id);
+
+        return $userDeleted ? ApiResponse::success() : ApiResponse::notFound();;
     }
 }

@@ -5,20 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Invite extends Model
+class Log extends Model
 {
     use HasFactory;
 
-    protected $table = 'invites';
+    protected $table = 'logs';
 
     protected $fillable = [
-        'token',
         'user_id',
-        'expires_at',
-        'used_at',
+        'event_type',
+        'context'
     ];
 
     protected $casts = [
-        'expires_at' => 'datetime',
+        'context' => 'json',
     ];
 }

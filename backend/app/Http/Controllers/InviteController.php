@@ -2,21 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invite;
+use App\Http\Requests\InviteRequest;
+use App\Services\InviteService;
 use App\Utils\ApiResponse;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class InviteController extends Controller
 {
-    public function validateToken(Request $request){
+    public function __construct(private InviteService $inviteService) {}
+
+    public function validateToken(Request $request): JsonResponse
+    {
         $token = $request->query('token');
 
-        if(!$token) return ApiResponse::unauthorized();
+        $tokenValidated = $this->inviteService->validateToken(token: $token);
 
-        $invite = Invite::where('token', $token)->first();
+        return $tokenValidated ? ApiResponse::success() : ApiResponse::unauthorized();
+    }
 
-        if(!$invite || $invite->expires_at < Carbon::now()) return ApiResponse::unauthorized();
+    public function store(InviteRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $this->inviteService->createForEmail(email: $validated['email']);
 
         return ApiResponse::success();
     }
