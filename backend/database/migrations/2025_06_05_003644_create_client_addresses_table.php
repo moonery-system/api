@@ -25,7 +25,7 @@ return new class extends Migration
             //$table->boolean('is_primary');
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 

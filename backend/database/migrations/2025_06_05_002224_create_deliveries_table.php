@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('tracking_code')->unique();
             $table->unsignedBigInteger('creator_id');
-            $table->unsignedBigInteger('delivery_man_id');
+            $table->unsignedBigInteger('delivery_man_id')->nullable();
             $table->unsignedBigInteger('client_id');
             $table->unsignedBigInteger('delivery_status_id');
             $table->dateTime('scheduled_to');
@@ -27,7 +27,7 @@ return new class extends Migration
 
             $table->foreign('creator_id')->references('id')->on('users');
             $table->foreign('delivery_man_id')->references('id')->on('users');
-            $table->foreign('client_id')->references('id')->on('users');
+            $table->foreign('client_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreign('delivery_status_id')->references('id')->on('delivery_status');
         });
     }

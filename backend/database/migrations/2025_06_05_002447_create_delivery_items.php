@@ -19,6 +19,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->integer('quantity');
             $table->decimal('weight', 10, 2);
+
+            $table->foreign('delivery_id')->references('id')->on('deliveries')->cascadeOnDelete();
         });
     }
 
