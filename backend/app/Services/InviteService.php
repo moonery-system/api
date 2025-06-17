@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Events\InviteCreated;
 use App\Models\Invite;
+use App\Repositories\InviteRepository;
 use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -10,6 +12,7 @@ use Illuminate\Support\Str;
 class InviteService
 {
     public function __construct(
+        private InviteRepository $inviteRepository,
         private UserRepository $userRepository
     ) {}
 
@@ -20,11 +23,13 @@ class InviteService
             ->where('expires_at', '>', Carbon::now())
             ->update(['expires_at' => Carbon::now()]);
 
-        return Invite::create([
+        $invite = Invite::create([
             'user_id' => $userId,
             'token' => Str::random(60),
             'expires_at' => Carbon::now()->addHour(),
         ]);
+
+        return $invite;
     }
 
     public function createForEmail($email)
@@ -35,21 +40,11 @@ class InviteService
         return $this->createForUserId(userId: $user->id);
     }
 
-    public function getInviteByToken($token)
-    {
-        return Invite::where('token', $token)->first();
-    }
-
-    public function getInviteByUserId($userId)
-    {
-        return Invite::where('user_id', $userId);
-    }
-
     public function validateToken($token)
     {
         if (!$token) return false;
 
-        $invite = $this->getInviteByToken(token: $token);
+        $invite = $this->inviteRepository->findByToken(token: $token);
 
         if (!$invite || $invite->expires_at->isPast() || $invite->used_at) return false;
 
