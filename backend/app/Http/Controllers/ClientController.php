@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AddressRequest;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Repositories\ClientRepository;
 use App\Services\ClientService;
 use App\Services\UserService;
 use App\Utils\ApiResponse;
@@ -12,7 +13,12 @@ use Illuminate\Http\JsonResponse;
 
 class ClientController extends Controller
 {
-    public function __construct(private UserService $userService, private ClientService $clientService) {}
+    public function __construct(
+        private ClientRepository $clientRepository,
+
+        private UserService $userService,
+        private ClientService $clientService
+    ) {}
 
     public function index(): JsonResponse
     {
@@ -33,7 +39,7 @@ class ClientController extends Controller
 
     public function show($id): JsonResponse
     {
-        $client = $this->clientService->getClientById(userId: $id);
+        $client = $this->clientRepository->findById(id: $id);
 
         if (!$client) return ApiResponse::notFound();
 
@@ -50,7 +56,7 @@ class ClientController extends Controller
 
     public function destroy($id): JsonResponse
     {
-        $client = $this->clientService->getClientById(userId: $id);
+        $client = $this->clientRepository->findById(id: $id);
 
         if (!$client) return ApiResponse::notFound();
 

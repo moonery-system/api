@@ -66,18 +66,6 @@ class ClientService
         })->with('clientAddress')->get();
     }
 
-    public function getClientById($userId)
-    {
-        $clientRoleId = $this->roleRepository->findByName('Client')->id;
-
-        return User::where('id', $userId)
-            ->whereHas('roles', function ($q) use ($clientRoleId) {
-                $q->where('roles.id', $clientRoleId);
-            })
-            ->with('clientAddress')
-            ->first();
-    }
-
     public function deleteClient($client)
     {
         App::make(ClientAddressService::class)->deleteClientAddresses(user: $client);
