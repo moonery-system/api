@@ -71,11 +71,6 @@ class UserService
         return true;
     }
 
-    public function getRoleIdByName($roleName)
-    {
-        return Role::where('name', $roleName)->firstOrFail()->id;
-    }
-
     public function changePassword(array $data, $token)
     {
         $valid_invite = $this->inviteService->validateToken($token);

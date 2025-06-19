@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Enums\LogEventTypeEnum;
+use App\Models\Role;
 use App\Models\User;
+use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -13,13 +15,16 @@ class ClientService
 {
     public function __construct(
         private UserRepository $userRepository,
+        private RoleRepository $roleRepository,
+
+        private ClientAddressService $clientAddressService,
         private UserService $userService,
         private LogService $logService
     ) {}
 
     public function createClient($userValidated, $addressValidated): Model|User
     {
-        $clientRoleId = $this->userService->getRoleIdByName(roleName: 'Client');
+        $clientRoleId = $this->roleRepository->findByName('Client')->id;
 
         $user = $this->userService->createUserWithInvite(
             name: $userValidated['name'],
@@ -31,7 +36,7 @@ class ClientService
             'client' => $user,
         ]);
 
-        App::make(ClientAddressService::class)->createClientAddress(userId: $user->id, addressData: $addressValidated);
+        $this->clientAddressService->createClientAddress(userId: $user->id, addressData: $addressValidated);
 
         return $user;
     }
@@ -54,7 +59,7 @@ class ClientService
 
     public function getAllClients(): array|Collection
     {
-        $clientRoleId = $this->userService->getRoleIdByName('Client');
+        $clientRoleId = $this->roleRepository->findByName('Client')->id;
 
         return User::whereHas('roles', function ($query) use ($clientRoleId) {
             $query->where('roles.id', $clientRoleId);
@@ -63,7 +68,7 @@ class ClientService
 
     public function getClientById($userId)
     {
-        $clientRoleId = $this->userService->getRoleIdByName(roleName: 'Client');
+        $clientRoleId = $this->roleRepository->findByName('Client')->id;
 
         return User::where('id', $userId)
             ->whereHas('roles', function ($q) use ($clientRoleId) {
@@ -80,7 +85,7 @@ class ClientService
         if ($client->roles()->count() === 1) {
             $this->userService->deleteUser(userId: $client->id);
         } else {
-            $clientRoleId = $this->userService->getRoleIdByName(roleName: 'Client');
+            $clientRoleId = $this->roleRepository->findByName('Client')->ii;
             $client->roles()->detach($clientRoleId);
             $this->logService->record(eventType: LogEventTypeEnum::CLIENT_DELETED, context: [
                 'client' => $client,
