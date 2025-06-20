@@ -12,10 +12,10 @@ class AuthController extends Controller
 {
     public function login(Request $request): JsonResponse
     {
-        $request->validate(rules: [
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required'
-        ], params: [
+        ], [
             'email.required' => 'The email is required.',
             'email.email' => 'The email must be a valid email.',
             'password.required' => 'The password is required.'
