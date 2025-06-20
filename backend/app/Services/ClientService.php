@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\LogEventTypeEnum;
 use App\Models\Role;
 use App\Models\User;
+use App\Repositories\ClientRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,6 +17,7 @@ class ClientService
     public function __construct(
         private UserRepository $userRepository,
         private RoleRepository $roleRepository,
+        private ClientRepository $clientRepository,
 
         private ClientAddressService $clientAddressService,
         private UserService $userService,
@@ -66,9 +68,12 @@ class ClientService
         })->with('clientAddress')->get();
     }
 
-    public function deleteClient($client)
+    public function deleteClient($userId)
     {
-        App::make(ClientAddressService::class)->deleteClientAddresses(user: $client);
+        $client = $this->clientRepository->findById($userId);
+        if (!$client) return false;
+
+        $this->clientAddressService->deleteClientAddresses(user: $client);
 
         if ($client->roles()->count() === 1) {
             $this->userService->deleteUser(userId: $client->id);
