@@ -41,9 +41,7 @@ class ClientController extends Controller
     {
         $client = $this->clientRepository->findById(id: $id);
 
-        if (!$client) return ApiResponse::notFound();
-
-        return ApiResponse::success(data: $client);
+        return $client ? ApiResponse::success(data: $client) : ApiResponse::notFound();
     }
 
     public function update(UserUpdateRequest $request, $id): JsonResponse
@@ -56,12 +54,8 @@ class ClientController extends Controller
 
     public function destroy($id): JsonResponse
     {
-        $client = $this->clientRepository->findById(id: $id);
+        $client = $this->clientService->deleteClient(userId: $id);
 
-        if (!$client) return ApiResponse::notFound();
-
-        $this->clientService->deleteClient(client: $client);
-
-        return ApiResponse::success();
+        return $client ? ApiResponse::success() : ApiResponse::notFound();
     }
 }
