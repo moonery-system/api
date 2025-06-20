@@ -15,13 +15,13 @@ return new class extends Migration
     {
         Schema::create('deliveries', function (Blueprint $table) {
             $table->id();
-            $table->string('tracking_code')->unique();
+            $table->string('tracking_code')->unique()->nullable();
             $table->unsignedBigInteger('creator_id');
             $table->unsignedBigInteger('delivery_man_id')->nullable();
             $table->unsignedBigInteger('client_id');
             $table->unsignedBigInteger('delivery_status_id');
-            $table->dateTime('scheduled_to');
-            $table->dateTime('delivered_at');
+            $table->dateTime('scheduled_to')->nullable();
+            $table->dateTime('delivered_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

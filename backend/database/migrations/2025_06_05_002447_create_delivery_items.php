@@ -16,9 +16,11 @@ return new class extends Migration
         Schema::create('delivery_items', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('delivery_id');
+            $table->string('name');
             $table->text('description')->nullable();
             $table->integer('quantity');
             $table->decimal('weight', 10, 2);
+            $table->timestamps();
 
             $table->foreign('delivery_id')->references('id')->on('deliveries')->cascadeOnDelete();
         });
