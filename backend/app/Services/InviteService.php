@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Events\InviteCreated;
-use App\Models\Invite;
 use App\Repositories\InviteRepository;
 use App\Repositories\UserRepository;
 use Carbon\Carbon;
@@ -18,12 +16,9 @@ class InviteService
 
     public function createForUserId($userId)
     {
-        Invite::where('user_id', $userId)
-            ->whereNull('used_at')
-            ->where('expires_at', '>', Carbon::now())
-            ->update(['expires_at' => Carbon::now()]);
+        $this->inviteRepository->expireActiveInvite($userId);
 
-        $invite = Invite::create([
+        $invite = $this->inviteRepository->create([
             'user_id' => $userId,
             'token' => Str::random(60),
             'expires_at' => Carbon::now()->addHour(),
