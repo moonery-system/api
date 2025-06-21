@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -41,5 +42,14 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/clients/{id}', 'show')->middleware('can:clients.view');
         Route::put('/clients/{id}', 'update')->middleware('can:clients.update');
         Route::delete('/clients/{id}', 'destroy')->middleware('can:clients.delete');
+    });
+
+    //delivery routes
+    Route::controller(DeliveryController::class)->group(function (){
+        Route::get('/deliveries', 'index')->middleware('can:deliveries.viewAny');
+        Route::post('/deliveries', 'store')->middleware('can:deliveries.create');
+        Route::get('/deliveries/{id}', 'show')->middleware('can:deliveries.view');
+        Route::put('/deliveries/update-status/{id}', 'updateStatus')->middleware('can:deliveries.update');
+        Route::delete('/deliveries/{id}', 'delete')->middleware('can:deliveries.delete');
     });
 });
