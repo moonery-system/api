@@ -14,12 +14,13 @@ class UserController extends Controller
 {
     public function __construct(
         private UserService $userService,
+
         private UserRepository $userRepository
         ){}
 
     public function index(): JsonResponse
     {
-        $users = $this->userService->getAllUsers();
+        $users = $this->userRepository->findAll();
         return ApiResponse::success(data: $users);
     }
 

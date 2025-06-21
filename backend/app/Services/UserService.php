@@ -3,28 +3,28 @@
 namespace App\Services;
 
 use App\Enums\LogEventTypeEnum;
-use App\Models\Role;
-use App\Models\User;
+use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\App;
 
 class UserService
 {
     public function __construct(
         private UserRepository $userRepository,
+        private RoleRepository $roleRepository,
+
         private InviteService $inviteService,
         private LogService $logService
     ) {}
 
     public function createUserWithInvite($name, $email, $roleId)
     {
-        $user = User::create([
+        $user = $this->userRepository->create([
             'name' => $name,
             'email' => $email
         ]);
 
-        if ($roleId && $role = Role::find($roleId)) {
+        if ($roleId && $role = $this->roleRepository->findById($roleId)) {
             $role->users()->attach($user->id);
         }
 
@@ -50,11 +50,6 @@ class UserService
         ]);
 
         return $user;
-    }
-
-    public function getAllUsers()
-    {
-        return User::all();
     }
 
     public function deleteUser($userId)

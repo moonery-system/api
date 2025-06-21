@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Http\Requests\LoginRequest;
+use App\Repositories\UserRepository;
 use App\Utils\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,21 +11,18 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function login(Request $request): JsonResponse
+    public function __construct(
+        private UserRepository $userRepository
+    ){}
+
+    public function login(LoginRequest $request): JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ], [
-            'email.required' => 'The email is required.',
-            'email.email' => 'The email must be a valid email.',
-            'password.required' => 'The password is required.'
-        ]);
+        $validated = $request->validated();
 
-        $email = $request->email;
-        $password = $request->password;
+        $email = $validated['email'];
+        $password = $validated['password'];
 
-        $user = User::where('email', $email)->first();
+        $user = $this->userRepository->findByEmail($email);
 
         if (!$user->activated_at) return ApiResponse::unauthorized();
 
