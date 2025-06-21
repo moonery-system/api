@@ -22,7 +22,7 @@ class ClientController extends Controller
 
     public function index(): JsonResponse
     {
-        $clients = $this->clientService->getAllClients();
+        $clients = $this->clientRepository->findAll();
 
         return ApiResponse::success(data: $clients);
     }

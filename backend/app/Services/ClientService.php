@@ -3,14 +3,10 @@
 namespace App\Services;
 
 use App\Enums\LogEventTypeEnum;
-use App\Models\Role;
 use App\Models\User;
 use App\Repositories\ClientRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\App;
 
 class ClientService
 {
@@ -24,7 +20,7 @@ class ClientService
         private LogService $logService
     ) {}
 
-    public function createClient($userValidated, $addressValidated): Model|User
+    public function createClient($userValidated, $addressValidated): User
     {
         $clientRoleId = $this->roleRepository->findByName('Client')->id;
 
@@ -57,15 +53,6 @@ class ClientService
         ]);
 
         return $client;
-    }
-
-    public function getAllClients(): array|Collection
-    {
-        $clientRoleId = $this->roleRepository->findByName('Client')->id;
-
-        return User::whereHas('roles', function ($query) use ($clientRoleId) {
-            $query->where('roles.id', $clientRoleId);
-        })->with('clientAddress')->get();
     }
 
     public function deleteClient($userId)

@@ -4,15 +4,19 @@ namespace App\Services;
 
 use App\Enums\LogEventTypeEnum;
 use App\Models\ClientAddress;
-use Illuminate\Database\Eloquent\Model;
+use App\Repositories\ClientAddressRepository;
 
 class ClientAddressService
 {
-    public function __construct(private LogService $logService) {}
+    public function __construct(
+        private ClientAddressRepository $clientAddressRepository,
+
+        private LogService $logService
+    ) {}
     
-    public function createClientAddress($userId, $addressData): ClientAddress|Model
+    public function createClientAddress($userId, $addressData): ClientAddress
     {
-        $address = ClientAddress::create([
+        $address = $this->clientAddressRepository->create([
             'user_id' => $userId,
             'address_line' => $addressData['address_line'],
             'neighborhood' => $addressData['neighborhood'],
@@ -44,7 +48,7 @@ class ClientAddressService
 
     public function deleteClientAddressById($addressId): bool
     {
-        $address = ClientAddress::find(id: $addressId);
+        $address = $this->clientAddressRepository->findById(id: $addressId);
 
         if (!$address) {
             return false;
