@@ -24,7 +24,8 @@ class ClientAddressController extends Controller
 
     public function update(AddressRequest $request, $clientId, $addressId): void
     {
-        // update logic
+        // TODO:
+        //     check if makes sense a update on client addresses
     }
 
     public function destroy($clientId, $addressId): JsonResponse

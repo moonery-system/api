@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Enums\LogEventTypeEnum;
 use App\Models\Delivery;
-use App\Models\DeliveryItems;
 use App\Repositories\ClientRepository;
 use App\Repositories\DeliveryRepository;
 
