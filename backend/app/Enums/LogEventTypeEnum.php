@@ -15,4 +15,10 @@ enum LogEventTypeEnum: string
     
     case CLIENT_ADDRESS_CREATED = 'client_address_created';
     case CLIENT_ADDRESS_DELETED = 'client_address_deleted';
+
+    case DELIVERY_CREATED = 'delivery_created';
+    case DELIVERY_STATUS_UPDATE = 'delivery_status_update';
+    case DELIVERY_DELETED = 'delivery_deleted';
+
+    case DELIVERY_ITEMS_CREATED = 'delivery_items_created';
 }
