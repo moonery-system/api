@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Collection;
 
 class DeliveryRepository
 {
+    public function create(array $data): Delivery
+    {
+        return Delivery::create($data);
+    }
+
     public function findAll(): Collection
     {
         return Delivery::all();

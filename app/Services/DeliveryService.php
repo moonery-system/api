@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\LogEventTypeEnum;
-use App\Models\Delivery;
 use App\Repositories\ClientRepository;
 use App\Repositories\DeliveryRepository;
 
@@ -24,7 +23,7 @@ class DeliveryService
 
         if (!$clientId) return false;
 
-        $delivery = Delivery::create([
+        $delivery = $this->deliveryRepository->create([
             'creator_id' => $creatorId,
             'client_id' => $deliveryValidated['client_id'],
             'delivery_status_id' => '1'
