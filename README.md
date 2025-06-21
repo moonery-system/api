@@ -1,3 +1,2 @@
-A delivery management system built with a Laravel API using JWT Auth, Postgresql as the database, RabbitMQ for messaging, and a WebSocket API with Swoole + HyperF for notifications. The frontend is developed with Vue.js.
-
-In this project I strongly use SOLID and DRY concepts.
+This repo contains the backend API for the Moonery system, built with Laravel.  
+It features JWT authentication, RabbitMQ for messaging, request rate limiting, and follows **SOLID** and **DRY** principles for clean code.
