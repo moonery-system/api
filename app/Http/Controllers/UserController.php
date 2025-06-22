@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UserInterface;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
-use App\Repositories\UserRepository;
 use App\Services\UserService;
 use App\Utils\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +15,7 @@ class UserController extends Controller
     public function __construct(
         private UserService $userService,
 
-        private UserRepository $userRepository
+        private UserInterface $userRepository
         ){}
 
     public function index(): JsonResponse

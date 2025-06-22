@@ -2,20 +2,20 @@
 
 namespace App\Services;
 
+use App\Contracts\Repositories\ClientInterface;
+use App\Contracts\Repositories\UserInterface;
 use App\Enums\LogEventTypeEnum;
 use App\Enums\NotificationTitleEnum;
 use App\Factories\NotificationDescriptionFactory;
-use App\Repositories\ClientRepository;
-use App\Repositories\DeliveryRepository;
-use App\Repositories\UserRepository;
+use App\Contracts\Repositories\DeliveryInterface;
 
 class DeliveryService
 {
     public function __construct(
-        private DeliveryRepository $deliveryRepository,
-        private ClientRepository $clientRepository,
+        private UserInterface $userRepository,
+        private ClientInterface $clientRepository,
+        private DeliveryInterface $deliveryRepository,
 
-        private UserRepository $userRepository,
         private DeliveryItemsService $deliveryItemsService,
         private NotificationService $notificationService,
         private LogService $logService,

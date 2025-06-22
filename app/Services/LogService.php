@@ -2,14 +2,13 @@
 
 namespace App\Services;
 
+use App\Contracts\Repositories\LogInterface;
 use App\Enums\LogEventTypeEnum;
-use App\Models\Log;
-use App\Repositories\LogRepository;
 
 class LogService
 {
     public function __construct(
-        private LogRepository $logRepository
+        private LogInterface $logRepository
     ){}
 
     public function record(LogEventTypeEnum $eventType, $context = []): void

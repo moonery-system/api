@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\DeliveryInterface;
 use App\Http\Requests\DeliveryRequest;
 use App\Http\Requests\DeliveryStatusRequest;
-use App\Repositories\DeliveryRepository;
 use App\Services\DeliveryService;
 use App\Utils\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 class DeliveryController extends Controller
 {
     public function __construct(
-        private DeliveryRepository $deliveryRepository,
+        private DeliveryInterface $deliveryRepository,
 
         private DeliveryService $deliveryService
     ){}

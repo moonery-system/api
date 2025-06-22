@@ -2,10 +2,11 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\NotificationInterface;
 use App\Models\Notification;
 use Illuminate\Support\Facades\DB;
 
-class NotificationRepository
+class NotificationRepository implements NotificationInterface
 {
     public function createWithUsers(string $title, string $description, array $userIds): Notification
     {

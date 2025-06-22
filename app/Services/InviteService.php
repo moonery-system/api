@@ -2,16 +2,16 @@
 
 namespace App\Services;
 
-use App\Repositories\InviteRepository;
-use App\Repositories\UserRepository;
+use App\Contracts\Repositories\InviteInterface;
+use App\Contracts\Repositories\UserInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class InviteService
 {
     public function __construct(
-        private InviteRepository $inviteRepository,
-        private UserRepository $userRepository
+        private UserInterface $userRepository,
+        private InviteInterface $inviteRepository
     ) {}
 
     public function createForUserId($userId)

@@ -2,11 +2,12 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\DeliveryInterface;
 use App\Models\Delivery;
 use App\Models\DeliveryStatus;
 use Illuminate\Database\Eloquent\Collection;
 
-class DeliveryRepository
+class DeliveryRepository implements DeliveryInterface
 {
     public function create(array $data): Delivery
     {

@@ -2,9 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ClientAddressInterface;
 use App\Models\ClientAddress;
 
-class ClientAddressRepository
+class ClientAddressRepository implements ClientAddressInterface
 {
     public function create(array $data): ClientAddress
     {

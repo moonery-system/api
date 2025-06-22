@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
+use App\Contracts\Repositories\ClientAddressInterface;
 use App\Enums\LogEventTypeEnum;
 use App\Models\ClientAddress;
-use App\Repositories\ClientAddressRepository;
 
 class ClientAddressService
 {
     public function __construct(
-        private ClientAddressRepository $clientAddressRepository,
+        private ClientAddressInterface $clientAddressRepository,
 
         private LogService $logService
     ) {}

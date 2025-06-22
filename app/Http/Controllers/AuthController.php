@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\UserInterface;
 use App\Http\Requests\LoginRequest;
-use App\Repositories\UserRepository;
 use App\Utils\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,7 +12,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class AuthController extends Controller
 {
     public function __construct(
-        private UserRepository $userRepository
+        private UserInterface $userRepository
     ){}
 
     public function login(LoginRequest $request): JsonResponse

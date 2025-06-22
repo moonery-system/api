@@ -2,13 +2,15 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\RoleInterface;
+use App\Contracts\Repositories\UserInterface;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
-class UserRepository
+class UserRepository implements UserInterface
 {
     public function __construct(
-        private RoleRepository $roleRepository
+        private RoleInterface $roleRepository
     ) {}
     public function create(array $data): User
     {

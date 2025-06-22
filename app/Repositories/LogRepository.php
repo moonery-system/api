@@ -2,9 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\LogInterface;
 use App\Models\Log;
 
-class LogRepository
+class LogRepository implements LogInterface
 {
     public function create(array $data): Log
     {

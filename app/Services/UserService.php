@@ -2,16 +2,16 @@
 
 namespace App\Services;
 
+use App\Contracts\Repositories\RoleInterface;
+use App\Contracts\Repositories\UserInterface;
 use App\Enums\LogEventTypeEnum;
-use App\Repositories\RoleRepository;
-use App\Repositories\UserRepository;
 use Carbon\Carbon;
 
 class UserService
 {
     public function __construct(
-        private UserRepository $userRepository,
-        private RoleRepository $roleRepository,
+        private UserInterface $userRepository,
+        private RoleInterface $roleRepository,
 
         private InviteService $inviteService,
         private LogService $logService

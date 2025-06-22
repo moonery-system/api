@@ -2,19 +2,20 @@
 
 namespace App\Services;
 
+use App\Contracts\Repositories\NotificationInterface;
+use App\Contracts\Repositories\RoleInterface;
+use App\Contracts\Repositories\UserInterface;
 use App\Factories\NotificationDescriptionFactory;
-use App\Repositories\NotificationRepository;
-use App\Repositories\RoleRepository;
-use App\Repositories\UserRepository;
 use App\Enums\NotificationTitleEnum;
 use App\Models\Delivery;
 
 class NotificationService
 {
     public function __construct(
-        private RoleRepository $roleRepository,
-        private UserRepository $userRepository,
-        private NotificationRepository $notificationRepository,
+        private UserInterface$userRepository,
+
+        private RoleInterface $roleRepository,
+        private NotificationInterface $notificationRepository,
 
         private NotificationDescriptionFactory $descriptionFactory,
     ) {}

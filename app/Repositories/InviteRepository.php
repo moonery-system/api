@@ -2,10 +2,11 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\InviteInterface;
 use App\Models\Invite;
 use Carbon\Carbon;
 
-class InviteRepository
+class InviteRepository implements InviteInterface
 {
     public function create(array $data): Invite
     {
@@ -22,7 +23,7 @@ class InviteRepository
         return Invite::where('user_id', $userId)->first();
     }
 
-    public function expireActiveInvite(int $userId)
+    public function expireActiveInvite(int $userId): void
     {
         Invite::where('user_id', $userId)
             ->whereNull('used_at')

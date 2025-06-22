@@ -2,18 +2,19 @@
 
 namespace App\Services;
 
+use App\Contracts\Repositories\ClientInterface;
+use App\Contracts\Repositories\RoleInterface;
+use App\Contracts\Repositories\UserInterface;
 use App\Enums\LogEventTypeEnum;
 use App\Models\User;
-use App\Repositories\ClientRepository;
-use App\Repositories\RoleRepository;
-use App\Repositories\UserRepository;
 
 class ClientService
 {
     public function __construct(
-        private UserRepository $userRepository,
-        private RoleRepository $roleRepository,
-        private ClientRepository $clientRepository,
+        private UserInterface $userRepository,
+        private RoleInterface $roleRepository,
+
+        private ClientInterface $clientRepository,
 
         private ClientAddressService $clientAddressService,
         private UserService $userService,

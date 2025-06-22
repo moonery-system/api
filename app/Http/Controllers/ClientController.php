@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\ClientInterface;
 use App\Http\Requests\AddressRequest;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
-use App\Repositories\ClientRepository;
 use App\Services\ClientService;
 use App\Services\UserService;
 use App\Utils\ApiResponse;
@@ -14,7 +14,7 @@ use Illuminate\Http\JsonResponse;
 class ClientController extends Controller
 {
     public function __construct(
-        private ClientRepository $clientRepository,
+        private ClientInterface $clientRepository,
 
         private UserService $userService,
         private ClientService $clientService

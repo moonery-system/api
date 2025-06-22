@@ -2,13 +2,15 @@
 
 namespace App\Repositories;
 
+use App\Contracts\Repositories\ClientInterface;
+use App\Contracts\Repositories\RoleInterface;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
-class ClientRepository
+class ClientRepository implements ClientInterface
 {
     public function __construct(
-        private RoleRepository $roleRepository
+        private RoleInterface $roleRepository
     ){}
 
     public function findAll(): Collection
