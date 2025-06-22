@@ -74,4 +74,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(ClientAddress::class);
     }
+
+    public function notifications()
+    {
+        return $this->belongsToMany(Notification::class, 'user_notifications');
+    }
 }

@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\Enums\LogEventTypeEnum;
+use App\Enums\NotificationTitleEnum;
+use App\Factories\NotificationDescriptionFactory;
 use App\Repositories\ClientRepository;
 use App\Repositories\DeliveryRepository;
+use App\Repositories\UserRepository;
 
 class DeliveryService
 {
@@ -12,16 +15,20 @@ class DeliveryService
         private DeliveryRepository $deliveryRepository,
         private ClientRepository $clientRepository,
 
+        private UserRepository $userRepository,
         private DeliveryItemsService $deliveryItemsService,
+        private NotificationService $notificationService,
         private LogService $logService,
-    ){}
+
+        private NotificationDescriptionFactory $notificationDescriptionFactory
+    ) {}
 
     public function createDelivery($deliveryValidated)
     {
         $creatorId = auth()->id();
-        $clientId = $this->clientRepository->findById($deliveryValidated['client_id']);
+        $client = $this->clientRepository->findById($deliveryValidated['client_id']);
 
-        if (!$clientId) return false;
+        if (!$client) return false;
 
         $delivery = $this->deliveryRepository->create([
             'creator_id' => $creatorId,
@@ -35,6 +42,8 @@ class DeliveryService
 
         $items = $this->deliveryItemsService->createDeliveryItems($deliveryValidated['items'], $delivery['id']);
 
+        $this->notificationService->notifyDeliveryCreated($delivery, $items);
+
         return [
             'delivery' => $delivery,
             'items' => $items
@@ -47,7 +56,7 @@ class DeliveryService
         if (!$status) return false;
 
         $delivery = $this->deliveryRepository->findById($id);
-        if (!$delivery) return false;
+        if (!$delivery || $deliveryStatusValidated['status_id'] == $delivery->delivery_status_id) return false;
 
         $last_status = $this->deliveryRepository->findDeliveryStatusById($delivery->delivery_status_id);
 
@@ -55,11 +64,23 @@ class DeliveryService
         $delivery->save();
 
         $this->logService->record(eventType: LogEventTypeEnum::DELIVERY_STATUS_UPDATE, context: [
-            'last_status' => $delivery,
-            'new_status' => $status,
+            'last_status' => $last_status->label,
+            'new_status' => $status->label,
         ]);
 
+        $this->notificationService->notify(
+            userIds: [$delivery->client_id],
+            title: NotificationTitleEnum::DELIVERY_STATUS_UPDATE_CLIENT,
+            context: ['status' => $status->label]
+        );
+
         return true;
+    }
+
+    public function generateDeliveryDescription(array $items): string
+    {
+        $itemNames = array_map(fn($item) => $item['name'], $items);
+        return 'Delivery Items: ' . implode(', ', $itemNames) . '.';
     }
 
     public function deleteDelivery($id)
