@@ -12,12 +12,13 @@ use App\Models\Delivery;
 class NotificationService
 {
     public function __construct(
-        private UserInterface$userRepository,
-
+        private UserInterface $userRepository,
         private RoleInterface $roleRepository,
         private NotificationInterface $notificationRepository,
 
         private NotificationDescriptionFactory $descriptionFactory,
+
+        private RabbitMQPublisher $publisher,
     ) {}
 
     public function notify(array $userIds, NotificationTitleEnum $title, array $context): void
@@ -25,8 +26,15 @@ class NotificationService
         $strategy = $this->descriptionFactory->make($title);
         $description = $strategy->getDescription($context);
 
-        $this->notificationRepository
-            ->createWithUsers($title->value, $description, $userIds);
+        $notification = $this->notificationRepository->createWithUsers($title->value, $description, $userIds);
+
+        $this->publisher->publish('notifications.email', [
+            'notification_id' => $notification->id,
+        ]);
+
+        $this->publisher->publish('notifications.websocket', [
+            'notification_id' => $notification->id,
+        ]);
     }
 
     public function notifyDeliveryCreated(Delivery $delivery, array $items)
