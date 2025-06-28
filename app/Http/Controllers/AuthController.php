@@ -13,7 +13,7 @@ class AuthController extends Controller
 {
     public function __construct(
         private UserInterface $userRepository
-    ){}
+    ) {}
 
     public function login(LoginRequest $request): JsonResponse
     {
@@ -24,7 +24,7 @@ class AuthController extends Controller
 
         $user = $this->userRepository->findByEmail($email);
 
-        if (!$user->activated_at) return ApiResponse::unauthorized();
+        if (!$user || !$user->activated_at) return ApiResponse::unauthorized("Invalid Credentials");
 
         $attempt = JWTAuth::attempt([
             'email' => $email,
@@ -45,7 +45,13 @@ class AuthController extends Controller
 
     public function user(): JsonResponse
     {
-        $user = auth()->user();
-        return ApiResponse::success(data: $user);
+        try {
+            $user = auth()->user();
+            return ApiResponse::success(data: $user);
+        }
+        catch (\Exception $e)
+        {
+            return ApiResponse::unauthorized();
+        }
     }
 }
