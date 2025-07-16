@@ -3,10 +3,11 @@
 namespace App\Contracts\Repositories;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface ClientInterface
 {
-    public function findAll(): Collection;
+    public function findAll(): LengthAwarePaginator;
     public function findById(int $id): ?User;
+    public function findBySearch(string $search): LengthAwarePaginator;
 }

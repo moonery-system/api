@@ -10,6 +10,7 @@ use App\Services\ClientService;
 use App\Services\UserService;
 use App\Utils\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
@@ -20,11 +21,16 @@ class ClientController extends Controller
         private ClientService $clientService
     ) {}
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $clients = $this->clientRepository->findAll();
+        $search = $request->query('search');
+        $perPage = (int) $request->query('per_page', 10);
 
-        return ApiResponse::success(data: $clients);
+        $clients = $search
+            ? $this->clientRepository->findBySearch($search, $perPage)
+            : $this->clientRepository->findAll($perPage);
+
+        return ApiResponse::paginated($clients);
     }
 
     public function store(UserStoreRequest $userRequest, AddressRequest $addressRequest): JsonResponse
