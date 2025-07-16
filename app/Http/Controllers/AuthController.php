@@ -31,27 +31,44 @@ class AuthController extends Controller
             'password' => $password
         ]);
 
+        $cookie = cookie(
+            'token',
+            $attempt,
+            60,
+            null,
+            null,
+            true,
+            true,
+            false,
+            'Strict'
+        );
+
         if (!$attempt)
             return ApiResponse::unauthorized(message: 'Invalid Credentials');
 
-        return ApiResponse::success(data: $attempt);
+        return ApiResponse::success(message: 'Login successful')
+            ->withCookie($cookie);
     }
 
     public function logout(Request $request): JsonResponse
     {
         auth()->logout();
-        return ApiResponse::success();
+        $cookie = cookie('token', '', -1, '/', null, true, true);
+
+        return ApiResponse::success()
+            ->withCookie($cookie);
     }
 
     public function user(): JsonResponse
     {
-        try {
-            $user = auth()->user();
-            return ApiResponse::success(data: $user);
-        }
-        catch (\Exception $e)
-        {
-            return ApiResponse::unauthorized();
-        }
+        $user = auth()->user();
+        $permissions = $user->permissions()->pluck('permission');
+
+        $data = [
+            'user' => $user,
+            'permissions' => $permissions
+        ];
+
+        return ApiResponse::success(data: $data);
     }
 }

@@ -70,6 +70,17 @@ class User extends Authenticatable implements JWTSubject
         return $this->permissionsCache->contains($permission);
     }
 
+    public function permissions()
+    {
+        return $this->roles()
+            ->with('permissions')
+            ->get()
+            ->flatMap(function ($role) {
+                return $role->permissions;
+            })
+            ->unique('id');
+    }
+
     public function clientAddress()
     {
         return $this->hasMany(ClientAddress::class);
