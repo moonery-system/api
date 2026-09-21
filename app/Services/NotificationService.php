@@ -8,6 +8,7 @@ use App\Contracts\Repositories\UserInterface;
 use App\Factories\NotificationDescriptionFactory;
 use App\Enums\NotificationTitleEnum;
 use App\Models\Delivery;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class NotificationService
 {
@@ -20,6 +21,31 @@ class NotificationService
 
         private RabbitMQPublisher $publisher,
     ) {}
+
+    /**
+     * Notification is the user's own resource: the scope comes from the authenticated
+     * id, not from a permission.
+     */
+    public function listForCurrentUser(int $perPage): LengthAwarePaginator
+    {
+        return $this->notificationRepository->findByUserPaginated(
+            userId: auth()->id(),
+            perPage: $perPage
+        );
+    }
+
+    public function countUnreadForCurrentUser(): int
+    {
+        return $this->notificationRepository->countUnreadByUser(userId: auth()->id());
+    }
+
+    public function markAsReadForCurrentUser($notificationId): bool
+    {
+        return $this->notificationRepository->markAsRead(
+            userId: auth()->id(),
+            notificationId: (int) $notificationId
+        );
+    }
 
     public function notify(array $userIds, NotificationTitleEnum $title, array $context): void
     {

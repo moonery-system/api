@@ -5,6 +5,7 @@ use App\Http\Controllers\ClientAddressController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\InviteController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,13 @@ Route::middleware('auth:api')->group(function () {
             Route::get('/user', 'user');
             Route::post('/logout', 'logout');
         });
+
+    //notifications routes -- recurso proprio do usuario, sem permissao
+    Route::controller(NotificationController::class)->group(function () {
+        Route::get('/notifications', 'index');
+        Route::get('/notifications/unread-count', 'unreadCount');
+        Route::put('/notifications/{id}/read', 'markAsRead');
+    });
 
     //users routes
     Route::controller(UserController::class)->group(function () {
