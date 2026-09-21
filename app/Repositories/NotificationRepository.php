@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\NotificationInterface;
 use App\Models\Notification;
+use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class NotificationRepository implements NotificationInterface
@@ -27,10 +29,38 @@ class NotificationRepository implements NotificationInterface
         return Notification::with('users')->find($id);
     }
 
-    // TODO
-    //  find notifications from users
-    // public function findByUserId(int $userId): ?Notification
-    // {
-    //     return Not::where('user_id', $userId)->first();
-    // }
+    /**
+     * Joins the pivot so each row already carries this user's read_at.
+     */
+    public function findByUserPaginated(int $userId, int $perPage = 10): LengthAwarePaginator
+    {
+        return Notification::query()
+            ->join('user_notifications', 'user_notifications.notification_id', '=', 'notifications.id')
+            ->where('user_notifications.user_id', $userId)
+            ->select('notifications.*', 'user_notifications.read_at')
+            ->orderByDesc('notifications.created_at')
+            ->paginate($perPage);
+    }
+
+    public function countUnreadByUser(int $userId): int
+    {
+        return DB::table('user_notifications')
+            ->where('user_id', $userId)
+            ->whereNull('read_at')
+            ->count();
+    }
+
+    public function markAsRead(int $userId, int $notificationId): bool
+    {
+        $pivot = DB::table('user_notifications')
+            ->where('user_id', $userId)
+            ->where('notification_id', $notificationId);
+
+        if (!$pivot->exists()) return false;
+
+        // Idempotent: marking an already read one again is not an error.
+        $pivot->whereNull('read_at')->update(['read_at' => Carbon::now()]);
+
+        return true;
+    }
 }
