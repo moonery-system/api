@@ -9,6 +9,7 @@ use App\Http\Requests\UserUpdateRequest;
 use App\Services\UserService;
 use App\Utils\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -18,9 +19,14 @@ class UserController extends Controller
         private UserInterface $userRepository
         ){}
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $users = $this->userRepository->findAll();
+        $role = $request->query('role');
+
+        $users = $role
+            ? $this->userRepository->findByRole($role)
+            : $this->userRepository->findAll();
+
         return ApiResponse::success(data: $users);
     }
 
