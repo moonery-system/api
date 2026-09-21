@@ -4,6 +4,7 @@ namespace App\Contracts\Repositories;
 
 use App\Models\Delivery;
 use App\Models\DeliveryStatus;
+use App\Models\DeliveryStatusHistory;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 interface DeliveryInterface
@@ -11,6 +12,7 @@ interface DeliveryInterface
     public function create(array $data): Delivery;
     public function findById(int $id): ?Delivery;
     public function existsByTrackingCode(string $trackingCode): bool;
+    public function createStatusHistory(array $data): DeliveryStatusHistory;
 
     public function findDeliveryStatusById(int $id): ?DeliveryStatus;
     public function findDeliveryStatusByName(string $name): ?DeliveryStatus;

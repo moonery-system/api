@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Contracts\Repositories\DeliveryInterface;
 use App\Models\Delivery;
 use App\Models\DeliveryStatus;
+use App\Models\DeliveryStatusHistory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -17,12 +18,25 @@ class DeliveryRepository implements DeliveryInterface
 
     public function findById(int $id): ?Delivery
     {
-        return Delivery::with(['items', 'status', 'address', 'client'])->find($id);
+        return Delivery::with([
+            'items',
+            'status',
+            'address',
+            'client',
+            'deliveryman',
+            'statusHistory.status',
+            'statusHistory.user',
+        ])->find($id);
     }
 
     public function existsByTrackingCode(string $trackingCode): bool
     {
         return Delivery::where('tracking_code', $trackingCode)->exists();
+    }
+
+    public function createStatusHistory(array $data): DeliveryStatusHistory
+    {
+        return DeliveryStatusHistory::create($data);
     }
 
     public function findDeliveryStatusById(int $id): ?DeliveryStatus
