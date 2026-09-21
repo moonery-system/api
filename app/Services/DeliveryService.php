@@ -45,13 +45,17 @@ class DeliveryService
 
         if (!$address) return false;
 
+        $pending = $this->statusByName(DeliveryStatusEnum::PENDING);
+
         $delivery = $this->deliveryRepository->create([
             'tracking_code' => $this->generateTrackingCode(),
             'creator_id' => $creatorId,
             'client_id' => $deliveryValidated['client_id'],
             'client_address_id' => $address->id,
-            'delivery_status_id' => $this->statusByName(DeliveryStatusEnum::PENDING)->id
+            'delivery_status_id' => $pending->id
         ]);
+
+        $this->recordStatusHistory(deliveryId: $delivery->id, statusId: $pending->id);
 
         $this->logService->record(eventType: LogEventTypeEnum::DELIVERY_CREATED, context: [
             'delivery' => $delivery,
@@ -159,6 +163,11 @@ class DeliveryService
 
         if ($affected === 0) throw new BusinessException('This delivery is no longer available.');
 
+        $this->recordStatusHistory(
+            deliveryId: $delivery->id,
+            statusId: $this->statusByName(DeliveryStatusEnum::ATTACHED)->id
+        );
+
         $this->logService->record(eventType: LogEventTypeEnum::DELIVERY_ASSIGNED, context: [
             'delivery_id' => $delivery->id,
             'delivery_man_id' => $user->id,
@@ -182,6 +191,11 @@ class DeliveryService
         );
 
         if ($affected === 0) throw new BusinessException('Only a delivery you have taken and not picked up yet can be dropped.');
+
+        $this->recordStatusHistory(
+            deliveryId: $delivery->id,
+            statusId: $this->statusByName(DeliveryStatusEnum::PENDING)->id
+        );
 
         $this->logService->record(eventType: LogEventTypeEnum::DELIVERY_UNASSIGNED, context: [
             'delivery_id' => $delivery->id,
@@ -216,11 +230,17 @@ class DeliveryService
 
         $delivery->delivery_man_id = $deliveryman->id;
 
-        if ($current === DeliveryStatusEnum::PENDING->value) {
+        $movedToAttached = $current === DeliveryStatusEnum::PENDING->value;
+
+        if ($movedToAttached) {
             $delivery->delivery_status_id = $this->statusByName(DeliveryStatusEnum::ATTACHED)->id;
         }
 
         $delivery->save();
+
+        if ($movedToAttached) {
+            $this->recordStatusHistory(deliveryId: $delivery->id, statusId: $delivery->delivery_status_id);
+        }
 
         $this->logService->record(eventType: LogEventTypeEnum::DELIVERY_ASSIGNED, context: [
             'delivery_id' => $delivery->id,
@@ -273,6 +293,8 @@ class DeliveryService
 
         $delivery->save();
 
+        $this->recordStatusHistory(deliveryId: $delivery->id, statusId: $newStatus->id);
+
         $this->logService->record(eventType: LogEventTypeEnum::DELIVERY_STATUS_UPDATE, context: [
             'delivery_id' => $delivery->id,
             'last_status' => $lastStatus->label,
@@ -299,6 +321,28 @@ class DeliveryService
         }
 
         return $delivery;
+    }
+
+    public function availableTransitionsForCurrentUser(Delivery $delivery): array
+    {
+        return $this->transitionValidator->availableTransitionsFor(
+            delivery: $delivery,
+            user: auth()->user()
+        );
+    }
+
+    /**
+     * Written explicitly at every point that changes state. It cannot be an Eloquent
+     * observer: attach and detach change the status with a query builder update,
+     * which does not fire model events.
+     */
+    private function recordStatusHistory(int $deliveryId, int $statusId): void
+    {
+        $this->deliveryRepository->createStatusHistory([
+            'delivery_id' => $deliveryId,
+            'delivery_status_id' => $statusId,
+            'user_id' => auth()->id(),
+        ]);
     }
 
     private function statusByName(DeliveryStatusEnum $status): DeliveryStatus
