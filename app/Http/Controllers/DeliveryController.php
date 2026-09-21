@@ -39,7 +39,12 @@ class DeliveryController extends Controller
     {
         $delivery = $this->deliveryService->findVisibleDelivery(id: $id);
 
-        return $delivery ? ApiResponse::success(data: $delivery) : ApiResponse::notFound();
+        if (!$delivery) return ApiResponse::notFound();
+
+        $data = $delivery->toArray();
+        $data['available_transitions'] = $this->deliveryService->availableTransitionsForCurrentUser($delivery);
+
+        return ApiResponse::success(data: $data);
     }
 
     public function updateStatus(DeliveryStatusRequest $request, $id): JsonResponse
