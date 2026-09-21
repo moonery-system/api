@@ -79,17 +79,43 @@ class DeliveryTransitionValidator
             throw new BusinessException("You are not allowed to move a delivery to '{$target->value}'.");
         }
 
-        $this->assertActor(delivery: $delivery, user: $user, actor: $actor);
-    }
-
-    private function assertActor(Delivery $delivery, User $user, string $actor): void
-    {
-        if ($actor === self::ACTOR_OWNER_DELIVERYMAN && $delivery->delivery_man_id !== $user->id) {
+        if ($actor === self::ACTOR_OWNER_DELIVERYMAN && !$this->actorMatches($delivery, $user, $actor)) {
             throw new BusinessException('This delivery is assigned to another delivery man.');
         }
 
-        if ($actor === self::ACTOR_OWNER_CLIENT && $delivery->client_id !== $user->id) {
+        if ($actor === self::ACTOR_OWNER_CLIENT && !$this->actorMatches($delivery, $user, $actor)) {
             throw new BusinessException('This delivery belongs to another client.');
         }
+    }
+
+    /**
+     * Which moves this user can make on this delivery right now. The screen renders
+     * one button per entry, so the state machine is not duplicated in the frontend.
+     *
+     * @return array<int, string>
+     */
+    public function availableTransitionsFor(Delivery $delivery, User $user): array
+    {
+        $allowed = self::transitions()[$delivery->status->name] ?? [];
+
+        $available = [];
+
+        foreach ($allowed as $target => [$permission, $actor]) {
+            if (!$user->hasPermission($permission)) continue;
+            if (!$this->actorMatches($delivery, $user, $actor)) continue;
+
+            $available[] = $target;
+        }
+
+        return $available;
+    }
+
+    private function actorMatches(Delivery $delivery, User $user, string $actor): bool
+    {
+        return match ($actor) {
+            self::ACTOR_OWNER_DELIVERYMAN => $delivery->delivery_man_id === $user->id,
+            self::ACTOR_OWNER_CLIENT => $delivery->client_id === $user->id,
+            default => true,
+        };
     }
 }
