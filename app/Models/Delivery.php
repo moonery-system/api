@@ -46,4 +46,9 @@ class Delivery extends Model
     {
         return $this->belongsTo(DeliveryStatus::class, 'delivery_status_id');
     }
+
+    public function statusHistory()
+    {
+        return $this->hasMany(DeliveryStatusHistory::class)->oldest();
+    }
 }
