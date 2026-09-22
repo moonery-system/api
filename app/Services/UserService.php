@@ -6,6 +6,7 @@ use App\Contracts\Repositories\RoleInterface;
 use App\Contracts\Repositories\UserInterface;
 use App\Enums\LogEventTypeEnum;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UserService
 {
@@ -74,16 +75,24 @@ class UserService
         $user = $this->userRepository->findById(id: $valid_invite->user_id);
         if (!$user) return false;
 
-        $user->password = bcrypt($data['password']);
-        if (!$user->activated_at) $user->activated_at = Carbon::now();
-        $user->save();
+        $wasActivation = !$user->activated_at;
 
-        $valid_invite->used_at = Carbon::now();
-        $valid_invite->save();
+        // Senha e convite gravam juntos: erro no meio deixaria a senha trocada com o
+        // token ainda valido, ou o contrario.
+        DB::transaction(function () use ($user, $valid_invite, $data, $wasActivation) {
+            $user->password = bcrypt($data['password']);
+            if ($wasActivation) $user->activated_at = Carbon::now();
+            $user->save();
 
-        $this->logService->record(LogEventTypeEnum::USER_ACTIVATED, [
-            'user' => $user
-        ], $user->id);
+            $valid_invite->used_at = Carbon::now();
+            $valid_invite->save();
+
+            $this->logService->record(
+                $wasActivation ? LogEventTypeEnum::USER_ACTIVATED : LogEventTypeEnum::USER_PASSWORD_RESET,
+                ['user' => $user],
+                $user->id
+            );
+        });
 
         return true;
     }

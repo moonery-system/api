@@ -8,12 +8,14 @@ enum LogEventTypeEnum: string
     case USER_UPDATED = 'user_updated';
     case USER_DELETED = 'user_deleted';
     case USER_ACTIVATED = 'user_activated';
+    case USER_PASSWORD_RESET = 'user_password_reset';
     
     case CLIENT_CREATED = 'client_created';
     case CLIENT_UPDATED = 'client_updated';
     case CLIENT_DELETED = 'client_deleted';
     
     case CLIENT_ADDRESS_CREATED = 'client_address_created';
+    case CLIENT_ADDRESS_UPDATED = 'client_address_updated';
     case CLIENT_ADDRESS_DELETED = 'client_address_deleted';
 
     case DELIVERY_CREATED = 'delivery_created';
