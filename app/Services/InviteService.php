@@ -10,6 +10,10 @@ use Illuminate\Support\Str;
 
 class InviteService
 {
+    public const INVITE_ROUTING_KEY = 'invites.email';
+
+    public const PASSWORD_RESET_ROUTING_KEY = 'password-resets.email';
+
     public function __construct(
         private UserInterface $userRepository,
         private InviteInterface $inviteRepository,
@@ -17,7 +21,7 @@ class InviteService
         private RabbitMQPublisher $publisher
     ) {}
 
-    public function createForUserId($userId)
+    public function createForUserId($userId, string $routingKey = self::INVITE_ROUTING_KEY)
     {
         $this->inviteRepository->expireActiveInvite($userId);
 
@@ -28,7 +32,7 @@ class InviteService
         ]);
 
         try {
-            $this->publisher->publish('invites.email', [
+            $this->publisher->publish($routingKey, [
                 'invite_id' => $invite->id,
             ]);
         } catch (\Throwable $e) {
@@ -41,12 +45,19 @@ class InviteService
         return $invite;
     }
 
+    /**
+     * Same token machinery either way -- only the wording changes. An active user
+     * asking for a link is resetting a password, not being invited.
+     */
     public function createForEmail($email)
     {
         $user = $this->userRepository->findByEmail(email: $email);
         if (!$user) return null;
 
-        return $this->createForUserId(userId: $user->id);
+        return $this->createForUserId(
+            userId: $user->id,
+            routingKey: $user->activated_at ? self::PASSWORD_RESET_ROUTING_KEY : self::INVITE_ROUTING_KEY
+        );
     }
 
     public function validateToken($token)

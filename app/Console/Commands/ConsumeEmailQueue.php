@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Contracts\Repositories\InviteInterface;
 use App\Contracts\Repositories\NotificationInterface;
 use App\Mail\InviteMail;
+use App\Mail\PasswordResetMail;
 use App\Mail\NotificationMail;
 use App\Services\RabbitMQConsumer;
 use Illuminate\Console\Command;
@@ -31,6 +32,8 @@ class ConsumeEmailQueue extends Command
 
     private const INVITE_KEY = 'invites.email';
 
+    private const PASSWORD_RESET_KEY = 'password-resets.email';
+
     private const NOTIFICATION_KEY = 'notifications.email';
 
     public function __construct(
@@ -53,7 +56,7 @@ class ConsumeEmailQueue extends Command
 
         $this->consumer->consume(
             self::QUEUE,
-            [self::INVITE_KEY, self::NOTIFICATION_KEY],
+            [self::INVITE_KEY, self::PASSWORD_RESET_KEY, self::NOTIFICATION_KEY],
             fn(AMQPMessage $message) => $this->dispatch($message)
         );
 
@@ -68,6 +71,7 @@ class ConsumeEmailQueue extends Command
         try {
             match ($routingKey) {
                 self::INVITE_KEY => $this->sendInvite($data['invite_id'] ?? null),
+                self::PASSWORD_RESET_KEY => $this->sendPasswordReset($data['invite_id'] ?? null),
                 self::NOTIFICATION_KEY => $this->sendNotification($data['notification_id'] ?? null),
                 default => $this->warn("No handler for routing key {$routingKey}"),
             };
@@ -89,6 +93,19 @@ class ConsumeEmailQueue extends Command
         Mail::to($invite->user->email)->send(new InviteMail($invite));
 
         $this->info("Invite sent to {$invite->user->email}");
+    }
+
+    private function sendPasswordReset($inviteId): void
+    {
+        if (!$inviteId) return;
+
+        $invite = $this->inviteRepository->findById(id: $inviteId);
+
+        if (!$invite || !$invite->user) return;
+
+        Mail::to($invite->user->email)->send(new PasswordResetMail($invite));
+
+        $this->info("Password reset sent to {$invite->user->email}");
     }
 
     private function sendNotification($notificationId): void
