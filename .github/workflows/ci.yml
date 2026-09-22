@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: moonery_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_pgsql, mbstring, bcmath, exif, pcntl, xml
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan jwt:secret --force
+
+      - name: Lint
+        run: find app database routes config -name '*.php' -print0 | xargs -0 -n1 -P4 php -l > /dev/null
+
+      # The database name and driver come from phpunit.xml; only the connection
+      # details belong here.
+      - name: Tests
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_USERNAME: root
+          DB_PASSWORD: root
+        run: php artisan test
