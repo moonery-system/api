@@ -31,9 +31,34 @@ class AuthController extends Controller
             'password' => $password
         ]);
 
-        $cookie = cookie(
+        if (!$attempt)
+            return ApiResponse::unauthorized(message: 'Invalid Credentials');
+
+        return ApiResponse::success(message: 'Login successful')
+            ->withCookie($this->tokenCookie($attempt));
+    }
+
+    /**
+     * Hands back a fresh token so a session does not die at the 60 minute TTL. The
+     * old one goes to the blacklist (enabled in config/jwt.php).
+     */
+    public function refresh(): JsonResponse
+    {
+        try {
+            $token = auth()->refresh();
+        } catch (\Throwable $e) {
+            return ApiResponse::unauthorized(message: 'Token cannot be refreshed');
+        }
+
+        return ApiResponse::success(message: 'Token refreshed')
+            ->withCookie($this->tokenCookie($token));
+    }
+
+    private function tokenCookie(string $token)
+    {
+        return cookie(
             'token',
-            $attempt,
+            $token,
             60,
             null,
             null,
@@ -42,12 +67,6 @@ class AuthController extends Controller
             false,
             'Strict'
         );
-
-        if (!$attempt)
-            return ApiResponse::unauthorized(message: 'Invalid Credentials');
-
-        return ApiResponse::success(message: 'Login successful')
-            ->withCookie($cookie);
     }
 
     public function logout(Request $request): JsonResponse

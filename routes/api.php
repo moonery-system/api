@@ -6,6 +6,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,10 @@ Route::middleware('guest')->group(function () {
     });
 
     Route::post('/changePassword', [UserController::class, 'changePassword']);
+
+    // Mesma acao do POST /invite, com publico diferente: aqui e o usuario pedindo,
+    // la e o Admin reenviando.
+    Route::post('/auth/forgot-password', [InviteController::class, 'store']);
 });
 
 Route::middleware('auth:api')->group(function () {
@@ -25,6 +30,7 @@ Route::middleware('auth:api')->group(function () {
         ->controller(AuthController::class)
         ->group(function () {
             Route::get('/user', 'user');
+            Route::post('/refresh', 'refresh');
             Route::post('/logout', 'logout');
         });
 
@@ -44,6 +50,9 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/users/{id}', 'destroy')->middleware('can:users.delete');
     });
 
+    //roles routes -- lookup do formulario de usuario
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('can:users.create');
+
     //clients routes
     Route::controller(ClientController::class)->group(function () {
         Route::get('/clients', 'index')->middleware('can:clients.viewAny');
@@ -56,6 +65,8 @@ Route::middleware('auth:api')->group(function () {
     //clientes addresses routes
     Route::controller(ClientAddressController::class)->group(function () {
         Route::post('/clients/{id}/addresses', 'store')->middleware('can:clients.create');
+        Route::put('/clients/{id}/addresses/{addressId}', 'update')->middleware('can:clients.update');
+        Route::delete('/clients/{id}/addresses/{addressId}', 'destroy')->middleware('can:clients.delete');
     });
 
     //delivery routes
