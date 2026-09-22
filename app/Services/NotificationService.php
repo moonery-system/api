@@ -8,6 +8,7 @@ use App\Contracts\Repositories\UserInterface;
 use App\Factories\NotificationDescriptionFactory;
 use App\Enums\NotificationTitleEnum;
 use App\Models\Delivery;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class NotificationService
@@ -54,13 +55,22 @@ class NotificationService
 
         $notification = $this->notificationRepository->createWithUsers($title->value, $description, $userIds);
 
-        $this->publisher->publish('notifications.email', [
-            'notification_id' => $notification->id,
-        ]);
+        // A notificacao ja esta no banco. Broker fora nao pode derrubar a acao de
+        // dominio que a gerou -- o usuario ainda a encontra na listagem.
+        try {
+            $this->publisher->publish('notifications.email', [
+                'notification_id' => $notification->id,
+            ]);
 
-        $this->publisher->publish('notifications.websocket', [
-            'notification_id' => $notification->id,
-        ]);
+            $this->publisher->publish('notifications.websocket', [
+                'notification_id' => $notification->id,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to publish the notification', [
+                'notification_id' => $notification->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function notifyDeliveryCreated(Delivery $delivery, array $items)
