@@ -20,6 +20,7 @@ class RolesSeeder extends Seeder
             'Admin',
             'Client',
             'Delivery Man',
+            'Support',
         ];
 
         Role::insert(

@@ -34,6 +34,12 @@ class UsersSeeder extends Seeder
                 'email' => 'deliveryman@gmail.com',
                 'password' => bcrypt('deliveryman'),
                 'activated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'support',
+                'email' => 'support@gmail.com',
+                'password' => bcrypt('support'),
+                'activated_at' => Carbon::now(),
             ]
         ];
 

@@ -37,5 +37,18 @@ class RelatesPermissionsToRoles extends Seeder
                 'deliveries.attach'
             ])->pluck('id');
             $deliveryRole->permissions()->sync($deliveryPermissions);
+
+            // Atende e resolve, mas nao edita cadastro: sem clients.update.
+            $supportRole = Role::where('name', 'Support')->first();
+            $supportPermissions = Permission::whereIn('permission', [
+                'clients.view',
+                'deliveries.view',
+                'deliveries.viewAny',
+                'deliveries.viewAll',
+                'deliveries.update',
+                'deliveries.cancelAsSupport',
+                'chat.viewAll'
+            ])->pluck('id');
+            $supportRole->permissions()->sync($supportPermissions);
     }
 }

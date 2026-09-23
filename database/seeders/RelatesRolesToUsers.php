@@ -28,6 +28,12 @@ class RelatesRolesToUsers extends Seeder
             $clientUser->roles()->sync([$clientRole->id]);
         }
 
+        $supportUser = User::where('name', 'support')->first();
+        $supportRole = Role::where('name', 'Support')->first();
+        if ($supportUser && $supportRole) {
+            $supportUser->roles()->sync([$supportRole->id]);
+        }
+
         $deliveryUser = User::where('name', 'deliveryman')->first();
         $deliveryRole = Role::where('name', 'Delivery Man')->first();
         if ($deliveryUser && $deliveryRole) {
