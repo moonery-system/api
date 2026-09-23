@@ -6,6 +6,7 @@ use App\Models\ClientAddress;
 use App\Models\Delivery;
 use App\Models\DeliveryItems;
 use App\Models\DeliveryStatus;
+use App\Models\DeliveryStatusHistory;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -53,6 +54,14 @@ class DeliverySeeder extends Seeder
                 'client_id' => $client->id,
                 'client_address_id' => $address->id,
                 'delivery_status_id' => $pending->id,
+            ]);
+
+            // Sem isto a tela mostra "No status recorded yet": o seeder nao passa pelo
+            // service, que e quem normalmente grava o historico.
+            DeliveryStatusHistory::create([
+                'delivery_id' => $delivery->id,
+                'delivery_status_id' => $pending->id,
+                'user_id' => $admin->id,
             ]);
 
             foreach ($items as $item) {
