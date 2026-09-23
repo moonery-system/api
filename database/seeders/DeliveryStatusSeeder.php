@@ -53,6 +53,10 @@ class DeliveryStatusSeeder extends Seeder
                 'label' => 'Delivery canceled by the admin.',
             ],
             [
+                'name' => 'canceled_by_support',
+                'label' => 'Delivery canceled by the support team.',
+            ],
+            [
                 'name' => 'return_to_sender',
                 'label' => 'Delivery has been returned to sender.',
             ],

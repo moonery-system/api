@@ -13,6 +13,7 @@ enum DeliveryStatusEnum: string
     case CLIENT_NOT_FOUND = 'client_not_found';
     case CANCELED_BY_CLIENT = 'canceled_by_client';
     case CANCELED_BY_ADMIN = 'canceled_by_admin';
+    case CANCELED_BY_SUPPORT = 'canceled_by_support';
     case RETURN_TO_SENDER = 'return_to_sender';
 
     /**

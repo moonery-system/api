@@ -28,17 +28,20 @@ class DeliveryTransitionValidator
             DeliveryStatusEnum::PENDING->value => [
                 DeliveryStatusEnum::CANCELED_BY_CLIENT->value => ['deliveries.cancel', self::ACTOR_OWNER_CLIENT],
                 DeliveryStatusEnum::CANCELED_BY_ADMIN->value => ['deliveries.cancelAny', self::ACTOR_ANY],
+                DeliveryStatusEnum::CANCELED_BY_SUPPORT->value => ['deliveries.cancelAsSupport', self::ACTOR_ANY],
             ],
 
             DeliveryStatusEnum::ATTACHED->value => [
                 DeliveryStatusEnum::PICKED_UP->value => ['deliveries.update', self::ACTOR_OWNER_DELIVERYMAN],
                 DeliveryStatusEnum::CANCELED_BY_CLIENT->value => ['deliveries.cancel', self::ACTOR_OWNER_CLIENT],
                 DeliveryStatusEnum::CANCELED_BY_ADMIN->value => ['deliveries.cancelAny', self::ACTOR_ANY],
+                DeliveryStatusEnum::CANCELED_BY_SUPPORT->value => ['deliveries.cancelAsSupport', self::ACTOR_ANY],
             ],
 
             DeliveryStatusEnum::PICKED_UP->value => [
                 DeliveryStatusEnum::IN_TRANSIT->value => ['deliveries.update', self::ACTOR_OWNER_DELIVERYMAN],
                 DeliveryStatusEnum::CANCELED_BY_ADMIN->value => ['deliveries.cancelAny', self::ACTOR_ANY],
+                DeliveryStatusEnum::CANCELED_BY_SUPPORT->value => ['deliveries.cancelAsSupport', self::ACTOR_ANY],
             ],
 
             DeliveryStatusEnum::IN_TRANSIT->value => [
@@ -46,20 +49,23 @@ class DeliveryTransitionValidator
                 DeliveryStatusEnum::CLIENT_ADDRESS_NOT_FOUND->value => ['deliveries.update', self::ACTOR_OWNER_DELIVERYMAN],
                 DeliveryStatusEnum::CLIENT_NOT_FOUND->value => ['deliveries.update', self::ACTOR_OWNER_DELIVERYMAN],
                 DeliveryStatusEnum::CANCELED_BY_ADMIN->value => ['deliveries.cancelAny', self::ACTOR_ANY],
+                DeliveryStatusEnum::CANCELED_BY_SUPPORT->value => ['deliveries.cancelAsSupport', self::ACTOR_ANY],
             ],
 
             DeliveryStatusEnum::CLIENT_ADDRESS_NOT_FOUND->value => [
                 DeliveryStatusEnum::IN_TRANSIT->value => ['deliveries.update', self::ACTOR_OWNER_DELIVERYMAN],
                 DeliveryStatusEnum::RETURN_TO_SENDER->value => ['deliveries.update', self::ACTOR_OWNER_DELIVERYMAN],
+                DeliveryStatusEnum::CANCELED_BY_SUPPORT->value => ['deliveries.cancelAsSupport', self::ACTOR_ANY],
             ],
 
             DeliveryStatusEnum::CLIENT_NOT_FOUND->value => [
                 DeliveryStatusEnum::IN_TRANSIT->value => ['deliveries.update', self::ACTOR_OWNER_DELIVERYMAN],
                 DeliveryStatusEnum::RETURN_TO_SENDER->value => ['deliveries.update', self::ACTOR_OWNER_DELIVERYMAN],
+                DeliveryStatusEnum::CANCELED_BY_SUPPORT->value => ['deliveries.cancelAsSupport', self::ACTOR_ANY],
             ],
 
-            // delivered, canceled_by_client, canceled_by_admin and return_to_sender
-            // are final: no transition leaves them.
+            // delivered, canceled_by_client, canceled_by_admin, canceled_by_support
+            // and return_to_sender are final: no transition leaves them.
         ];
     }
 
