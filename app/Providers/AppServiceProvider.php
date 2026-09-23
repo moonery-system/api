@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Contracts\Repositories\ClientAddressInterface;
 use App\Contracts\Repositories\ClientInterface;
+use App\Contracts\Repositories\ConversationInterface;
 use App\Contracts\Repositories\DeliveryInterface;
+use App\Contracts\Repositories\MessageInterface;
 use App\Contracts\Repositories\InviteInterface;
 use App\Contracts\Repositories\LogInterface;
 use App\Contracts\Repositories\NotificationInterface;
@@ -12,7 +14,9 @@ use App\Contracts\Repositories\RoleInterface;
 use App\Contracts\Repositories\UserInterface;
 use App\Repositories\ClientAddressRepository;
 use App\Repositories\ClientRepository;
+use App\Repositories\ConversationRepository;
 use App\Repositories\DeliveryRepository;
+use App\Repositories\MessageRepository;
 use App\Repositories\InviteRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\NotificationRepository;
@@ -40,8 +44,18 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
+            ConversationInterface::class,
+            ConversationRepository::class
+        );
+
+        $this->app->bind(
             DeliveryInterface::class,
             DeliveryRepository::class
+        );
+
+        $this->app->bind(
+            MessageInterface::class,
+            MessageRepository::class
         );
 
         $this->app->bind(
