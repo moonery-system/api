@@ -22,10 +22,18 @@ class ClientAddressController extends Controller
         return ApiResponse::success(data: $address);
     }
 
-    public function update(AddressRequest $request, $clientId, $addressId): void
+    public function update(AddressRequest $request, $clientId, $addressId): JsonResponse
     {
-        // TODO:
-        //     check if makes sense a update on client addresses
+        $validated = $request->validated();
+
+        $updated = $this->clientAddressService->updateClientAddress(
+            addressId: $addressId,
+            data: $validated
+        );
+
+        return $updated
+            ? ApiResponse::success()
+            : ApiResponse::conflict('This address is used by a delivery and cannot be edited. Register a new one.');
     }
 
     public function destroy($clientId, $addressId): JsonResponse

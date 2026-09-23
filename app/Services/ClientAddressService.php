@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\Repositories\ClientAddressInterface;
 use App\Enums\LogEventTypeEnum;
+use App\Exceptions\BusinessException;
 use App\Models\ClientAddress;
 
 class ClientAddressService
@@ -33,6 +34,25 @@ class ClientAddressService
         return $address;
     }
 
+    /**
+     * An address referenced by a delivery is history: editing it would rewrite where a
+     * past delivery went. In that case the client registers a new address instead.
+     */
+    public function updateClientAddress($addressId, array $data): bool
+    {
+        $address = $this->clientAddressRepository->findById(id: $addressId);
+
+        if (!$address || $address->deliveries()->exists()) return false;
+
+        $address->update($data);
+
+        $this->logService->record(eventType: LogEventTypeEnum::CLIENT_ADDRESS_UPDATED, context: [
+            'address' => $address,
+        ]);
+
+        return true;
+    }
+
     public function deleteClientAddresses($user): void
     {
         $addresses = $user->clientAddress;
@@ -52,8 +72,12 @@ class ClientAddressService
     {
         $address = $this->clientAddressRepository->findById(id: $addressId);
 
-        if (!$address || $address->deliveries()->exists()) {
-            return false;
+        if (!$address) return false;
+
+        // Mesma regra do update: endereco referenciado por entrega e historico.
+        // 409 com mensagem, e nao 404, para o chamador saber por que falhou.
+        if ($address->deliveries()->exists()) {
+            throw new BusinessException('This address is used by a delivery and cannot be deleted.');
         }
 
         $address->delete();
