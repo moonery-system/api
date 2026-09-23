@@ -21,13 +21,13 @@ class UserController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $role = $request->query('role');
+        $users = $this->userRepository->findAllPaginated(
+            perPage: (int) $request->query('per_page', 10),
+            search: $request->query('search'),
+            role: $request->query('role')
+        );
 
-        $users = $role
-            ? $this->userRepository->findByRole($role)
-            : $this->userRepository->findAll();
-
-        return ApiResponse::success(data: $users);
+        return ApiResponse::paginated($users);
     }
 
     public function store(UserStoreRequest $userRequest): JsonResponse
