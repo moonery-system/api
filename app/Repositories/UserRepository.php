@@ -56,6 +56,19 @@ class UserRepository implements UserInterface
         return $query->latest()->paginate($perPage);
     }
 
+    /**
+     * By permission, not by role name -- the project decides authorisation by
+     * permission strings, and the support side of a conversation is whoever holds
+     * chat.viewAll.
+     */
+    public function findByPermission(string $permission): Collection
+    {
+        return User::whereHas(
+            'roles.permissions',
+            fn(Builder $query) => $query->where('permissions.permission', $permission)
+        )->get();
+    }
+
     public function findByRole(string $role): Collection
     {
         $roleId = $this->roleRepository->findByName($role)->id;
