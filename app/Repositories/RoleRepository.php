@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\RoleInterface;
 use App\Models\Role;
+use Illuminate\Database\Eloquent\Collection;
 
 class RoleRepository implements RoleInterface
 {
@@ -15,5 +16,10 @@ class RoleRepository implements RoleInterface
     public function findById(int $id): ?Role
     {
         return Role::find($id);
+    }
+
+    public function findAll(): Collection
+    {
+        return Role::orderBy('name')->get();
     }
 }
