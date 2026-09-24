@@ -71,27 +71,41 @@ class DeliveryTransitionValidator
 
     public function assertCanTransition(Delivery $delivery, DeliveryStatusEnum $target, User $user): void
     {
+        $reason = $this->checkTransition($delivery, $target, $user);
+
+        if ($reason !== null) throw new BusinessException($reason);
+    }
+
+    /**
+     * The same rules as assertCanTransition, without the side effect: null when the
+     * move is allowed, otherwise the reason it is not. Being the only place that holds
+     * the rules, the two cannot drift apart.
+     */
+    public function checkTransition(Delivery $delivery, DeliveryStatusEnum $target, User $user): ?string
+    {
         $current = $delivery->status->name;
 
         $allowed = self::transitions()[$current] ?? [];
 
         if (!isset($allowed[$target->value])) {
-            throw new BusinessException("A delivery in '{$current}' cannot move to '{$target->value}'.");
+            return "A delivery in '{$current}' cannot move to '{$target->value}'.";
         }
 
         [$permission, $actor] = $allowed[$target->value];
 
         if (!$user->hasPermission($permission)) {
-            throw new BusinessException("You are not allowed to move a delivery to '{$target->value}'.");
+            return "You are not allowed to move a delivery to '{$target->value}'.";
         }
 
         if ($actor === self::ACTOR_OWNER_DELIVERYMAN && !$this->actorMatches($delivery, $user, $actor)) {
-            throw new BusinessException('This delivery is assigned to another delivery man.');
+            return 'This delivery is assigned to another delivery man.';
         }
 
         if ($actor === self::ACTOR_OWNER_CLIENT && !$this->actorMatches($delivery, $user, $actor)) {
-            throw new BusinessException('This delivery belongs to another client.');
+            return 'This delivery belongs to another client.';
         }
+
+        return null;
     }
 
     /**
