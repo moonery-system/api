@@ -11,9 +11,11 @@ class LogService
         private LogInterface $logRepository
     ){}
 
-    public function record(LogEventTypeEnum $eventType, $context = []): void
+    public function record(LogEventTypeEnum $eventType, $context = [], ?int $userId = null): void
     {
-        $user = auth()->id();
+        $user = $userId ?? auth()->id();
+
+        if (!$user) return;
 
         $this->logRepository->create([
             'user_id' => $user,

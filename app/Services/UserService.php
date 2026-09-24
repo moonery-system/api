@@ -83,7 +83,7 @@ class UserService
 
         $this->logService->record(LogEventTypeEnum::USER_ACTIVATED, [
             'user' => $user
-        ]);
+        ], $user->id);
 
         return true;
     }
