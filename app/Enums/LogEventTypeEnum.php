@@ -25,4 +25,6 @@ enum LogEventTypeEnum: string
     case DELIVERY_UNASSIGNED = 'delivery_unassigned';
 
     case DELIVERY_ITEMS_CREATED = 'delivery_items_created';
+
+    case MESSAGE_SENT = 'message_sent';
 }
