@@ -13,6 +13,11 @@ class InviteRepository implements InviteInterface
         return Invite::create($data);
     }
 
+    public function findById(int $id): ?Invite
+    {
+        return Invite::with('user')->find($id);
+    }
+
     public function findByToken(string $token): ?Invite
     {
         return Invite::where('token', $token)->first();

@@ -22,6 +22,11 @@ class NotificationRepository implements NotificationInterface
         });
     }
 
+    public function findById(int $id): ?Notification
+    {
+        return Notification::with('users')->find($id);
+    }
+
     // TODO
     //  find notifications from users
     // public function findByUserId(int $userId): ?Notification
