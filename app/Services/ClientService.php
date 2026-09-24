@@ -21,7 +21,7 @@ class ClientService
         private LogService $logService
     ) {}
 
-    public function createClient($userValidated, $addressValidated): User
+    public function createClient($userValidated): User
     {
         $clientRoleId = $this->roleRepository->findByName('Client')->id;
 
@@ -34,8 +34,6 @@ class ClientService
         $this->logService->record(eventType: LogEventTypeEnum::CLIENT_CREATED, context: [
             'client' => $user,
         ]);
-
-        $this->clientAddressService->createClientAddress(userId: $user->id, addressData: $addressValidated);
 
         return $user;
     }
@@ -66,11 +64,13 @@ class ClientService
         if ($client->roles()->count() === 1) {
             $this->userService->deleteUser(userId: $client->id);
         } else {
-            $clientRoleId = $this->roleRepository->findByName('Client')->ii;
+            $clientRoleId = $this->roleRepository->findByName('Client')->id;
             $client->roles()->detach($clientRoleId);
             $this->logService->record(eventType: LogEventTypeEnum::CLIENT_DELETED, context: [
                 'client' => $client,
             ]);
         }
+
+        return true;
     }
 }

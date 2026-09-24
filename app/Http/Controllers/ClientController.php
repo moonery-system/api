@@ -33,12 +33,11 @@ class ClientController extends Controller
         return ApiResponse::paginated($clients);
     }
 
-    public function store(UserStoreRequest $userRequest, AddressRequest $addressRequest): JsonResponse
+    public function store(UserStoreRequest $userRequest): JsonResponse
     {
         $userValidated = $userRequest->validated();
-        $addressValidated = $addressRequest->validated();
 
-        $user = $this->clientService->createClient(userValidated: $userValidated, addressValidated: $addressValidated);
+        $user = $this->clientService->createClient(userValidated: $userValidated);
 
         return ApiResponse::success(data: $user);
     }

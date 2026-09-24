@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClientAddressController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\InviteController;
@@ -44,12 +45,17 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('/clients/{id}', 'destroy')->middleware('can:clients.delete');
     });
 
+    //clientes addresses routes
+    Route::controller(ClientAddressController::class)->group(function () {
+        Route::post('/clients/{id}/addresses', 'store')->middleware('can:clients.create');
+    });
+
     //delivery routes
     Route::controller(DeliveryController::class)->group(function (){
         Route::get('/deliveries', 'index')->middleware('can:deliveries.viewAny');
         Route::post('/deliveries', 'store')->middleware('can:deliveries.create');
         Route::get('/deliveries/{id}', 'show')->middleware('can:deliveries.view');
         Route::put('/deliveries/update-status/{id}', 'updateStatus')->middleware('can:deliveries.update');
-        Route::delete('/deliveries/{id}', 'delete')->middleware('can:deliveries.delete');
+        Route::delete('/deliveries/{id}', 'destroy')->middleware('can:deliveries.delete');
     });
 });
