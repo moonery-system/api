@@ -7,5 +7,6 @@ use App\Models\ClientAddress;
 interface ClientAddressInterface
 {
     public function create(array $data): ClientAddress;
-    public function findById(int $id): ClientAddress;
+    public function findById(int $id): ?ClientAddress;
+    public function findByIdAndUserId(int $id, int $userId): ?ClientAddress;
 }

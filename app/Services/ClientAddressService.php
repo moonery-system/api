@@ -38,6 +38,8 @@ class ClientAddressService
         $addresses = $user->clientAddress;
 
         foreach ($addresses as $address) {
+            if ($address->deliveries()->exists()) continue;
+
             $address->delete();
 
             $this->logService->record(eventType: LogEventTypeEnum::CLIENT_ADDRESS_DELETED, context: [
@@ -50,7 +52,7 @@ class ClientAddressService
     {
         $address = $this->clientAddressRepository->findById(id: $addressId);
 
-        if (!$address) {
+        if (!$address || $address->deliveries()->exists()) {
             return false;
         }
 

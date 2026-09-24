@@ -12,8 +12,15 @@ class ClientAddressRepository implements ClientAddressInterface
         return ClientAddress::create($data);
     }
 
-    public function findById(int $id): ClientAddress
+    public function findById(int $id): ?ClientAddress
     {
         return ClientAddress::find($id);
+    }
+
+    public function findByIdAndUserId(int $id, int $userId): ?ClientAddress
+    {
+        return ClientAddress::where('id', $id)
+            ->where('user_id', $userId)
+            ->first();
     }
 }

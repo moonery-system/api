@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\Repositories\ClientAddressInterface;
 use App\Contracts\Repositories\ClientInterface;
 use App\Contracts\Repositories\UserInterface;
 use App\Enums\LogEventTypeEnum;
@@ -15,6 +16,7 @@ class DeliveryService
         private UserInterface $userRepository,
         private ClientInterface $clientRepository,
         private DeliveryInterface $deliveryRepository,
+        private ClientAddressInterface $clientAddressRepository,
 
         private DeliveryItemsService $deliveryItemsService,
         private NotificationService $notificationService,
@@ -30,9 +32,17 @@ class DeliveryService
 
         if (!$client) return false;
 
+        $address = $this->clientAddressRepository->findByIdAndUserId(
+            id: $deliveryValidated['client_address_id'],
+            userId: $client->id
+        );
+
+        if (!$address) return false;
+
         $delivery = $this->deliveryRepository->create([
             'creator_id' => $creatorId,
             'client_id' => $deliveryValidated['client_id'],
+            'client_address_id' => $address->id,
             'delivery_status_id' => '1'
         ]);
 
