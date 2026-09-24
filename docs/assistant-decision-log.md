@@ -35,3 +35,13 @@ encontrado, correção. Nada aqui é retroativo nem aspiracional.
   429) conta como chamada no teto diário, porque é assim que a cota do provedor a conta.
 - **Problema:** um teste de virada de dia falhou. Era erro meu de aritmética (em março o Pacífico
   é UTC−8, não −7), não do código. **Correção:** o teste, não a implementação.
+- **`GeminiLlmClient`** escrito contra o formato `generateContent` que eu conhecia, **não
+  validado contra a API real ainda** (a sonda espera autorização). As `parts` cruas do turno do
+  modelo ficam em `providerState` e voltam sem alteração, para as *thought signatures*
+  atravessarem onde quer que estejam. Tokens de raciocínio contam como saída
+  (`totalTokenCount - promptTokenCount`).
+- **Problema:** 3 testes do Gemini falharam com "esperava 404, veio 503". Causa: `Http::fake()`
+  empilha stubs e o primeiro que casa ganha; um teste que fakeia duas vezes continua ouvindo a
+  primeira resposta. **Correção:** o helper de teste recria a factory a cada stub. O código de
+  produção não mudou. (Antes disso, um conflito de nome: `client()` do meu teste colidia com o
+  `client()` da `TestCase`.)

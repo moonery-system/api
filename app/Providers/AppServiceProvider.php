@@ -28,6 +28,12 @@ use App\Repositories\LogRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
+use App\Assistant\Llm\GeminiLlmClient;
+use App\Assistant\Llm\GuardedLlmClient;
+use App\Assistant\Llm\LlmClient;
+use App\Assistant\Support\Clock;
+use App\Assistant\Support\Sleeper;
+use App\Assistant\Support\SystemClock;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -39,6 +45,36 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton(SystemClock::class);
+        $this->app->bind(Clock::class, SystemClock::class);
+        $this->app->bind(Sleeper::class, SystemClock::class);
+
+        // A singleton: the guard keeps the time of the last call, and the spacing between
+        // calls only works if every call goes through the same instance.
+        $this->app->singleton(LlmClient::class, function ($app) {
+            $provider = config('assistant.provider');
+            $settings = config("assistant.providers.{$provider}");
+
+            $inner = match ($provider) {
+                'gemini' => new GeminiLlmClient(
+                    apiKey: $settings['api_key'],
+                    model: config('assistant.model'),
+                    baseUrl: $settings['base_url'],
+                    timeoutSeconds: config('assistant.timeout_seconds'),
+                ),
+                default => throw new \InvalidArgumentException("Unknown assistant provider '{$provider}'."),
+            };
+
+            return new GuardedLlmClient(
+                inner: $inner,
+                usage: $app->make(AssistantUsageInterface::class),
+                clock: $app->make(Clock::class),
+                sleeper: $app->make(Sleeper::class),
+                settings: $settings,
+                dailyTokenCap: config('assistant.daily_token_cap'),
+            );
+        });
+
         $this->app->bind(
             AssistantPendingActionInterface::class,
             AssistantPendingActionRepository::class
