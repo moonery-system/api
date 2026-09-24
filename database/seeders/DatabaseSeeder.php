@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             UsersSeeder::class,
             RelatesRolesToUsers::class,
             DeliveryStatusSeeder::class,
+            DeliverySeeder::class,
         ]);
 
         User::factory()->count(1000)->client()->create();
