@@ -21,7 +21,7 @@ class DeliveryRepository implements DeliveryInterface
 
     public function findById(int $id): ?Delivery
     {
-        return Delivery::with('items')->get()->find($id);
+        return Delivery::with('items')->find($id);
     }
 
     public function findDeliveryStatusById(int $id): ?DeliveryStatus
