@@ -25,7 +25,8 @@ class RelatesPermissionsToRoles extends Seeder
                 'clients.view',
                 'deliveries.view',
                 'deliveries.viewAny',
-                'deliveries.cancel'
+                'deliveries.cancel',
+                'assistant.use'
             ])->pluck('id');
             $clientRole->permissions()->sync($clientPermissions);
     

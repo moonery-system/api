@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             RelatesPermissionsToRoles::class,
             UsersSeeder::class,
             RelatesRolesToUsers::class,
+            AssistantSeeder::class,
             DeliveryStatusSeeder::class,
             DeliverySeeder::class,
         ]);

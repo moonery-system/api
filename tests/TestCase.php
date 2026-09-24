@@ -4,6 +4,7 @@ namespace Tests;
 
 use App\Models\Role;
 use App\Models\User;
+use Database\Seeders\AssistantSeeder;
 use Database\Seeders\DeliveryStatusSeeder;
 use Database\Seeders\PermissionsSeeder;
 use Database\Seeders\RelatesPermissionsToRoles;
@@ -39,6 +40,7 @@ abstract class TestCase extends BaseTestCase
             PermissionsSeeder::class,
             RolesSeeder::class,
             RelatesPermissionsToRoles::class,
+            AssistantSeeder::class,
             DeliveryStatusSeeder::class,
         ]);
     }

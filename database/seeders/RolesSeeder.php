@@ -21,6 +21,8 @@ class RolesSeeder extends Seeder
             'Client',
             'Delivery Man',
             'Support',
+            // The chat bot. It holds no permission at all: not even chat.viewAll.
+            'Assistant',
         ];
 
         Role::insert(

@@ -37,7 +37,8 @@ class PermissionsSeeder extends Seeder
             'deliveries.cancel',
             'deliveries.cancelAny',
             'deliveries.cancelAsSupport',
-            'chat.viewAll'
+            'chat.viewAll',
+            'assistant.use'
         ];
 
         Permission::insert(
