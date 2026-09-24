@@ -5,6 +5,7 @@ use App\Http\Controllers\ClientAddressController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\InviteController;
+use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -33,6 +34,17 @@ Route::middleware('auth:api')->group(function () {
             Route::post('/refresh', 'refresh');
             Route::post('/logout', 'logout');
         });
+
+    //chat routes -- a propria conversa nao exige permissao; a caixa de entrada sim.
+    //As rotas literais vem antes de /{id}, senao "me" casaria como id.
+    Route::controller(ConversationController::class)->group(function () {
+        Route::get('/conversations/me', 'me');
+        Route::get('/conversations/unread-count', 'unreadCount');
+        Route::get('/conversations', 'index')->middleware('can:chat.viewAll');
+        Route::get('/conversations/{id}', 'show');
+        Route::post('/conversations/{id}/messages', 'storeMessage');
+        Route::put('/conversations/{id}/read', 'markAsRead');
+    });
 
     //notifications routes -- recurso proprio do usuario, sem permissao
     Route::controller(NotificationController::class)->group(function () {
