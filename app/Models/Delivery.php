@@ -16,6 +16,7 @@ class Delivery extends Model
         'creator_id',
         'delivery_man_id',
         'client_id',
+        'client_address_id',
         'delivery_status_id',
         'scheduled_to',
         'delivered_at',
@@ -24,5 +25,10 @@ class Delivery extends Model
     public function items()
     {
         return $this->hasMany(DeliveryItems::class);
+    }
+
+    public function address()
+    {
+        return $this->belongsTo(ClientAddress::class, 'client_address_id');
     }
 }

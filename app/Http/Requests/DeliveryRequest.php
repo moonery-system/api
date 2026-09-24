@@ -26,6 +26,7 @@ class DeliveryRequest extends FormRequest
         return [
             // 'delivery_status_id' => 'required|integer',
             'client_id' => 'required|integer',
+            'client_address_id' => 'required|integer|exists:client_addresses,id',
             'items' => 'required|array',
             'items.*.name' => 'required|min:5|max:255',
             'items.*.quantity' => 'required|integer',
