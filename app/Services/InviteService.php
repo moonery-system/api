@@ -5,13 +5,16 @@ namespace App\Services;
 use App\Contracts\Repositories\InviteInterface;
 use App\Contracts\Repositories\UserInterface;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class InviteService
 {
     public function __construct(
         private UserInterface $userRepository,
-        private InviteInterface $inviteRepository
+        private InviteInterface $inviteRepository,
+
+        private RabbitMQPublisher $publisher
     ) {}
 
     public function createForUserId($userId)
@@ -23,6 +26,17 @@ class InviteService
             'token' => Str::random(60),
             'expires_at' => Carbon::now()->addHour(),
         ]);
+
+        try {
+            $this->publisher->publish('invites.email', [
+                'invite_id' => $invite->id,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to publish the invite email', [
+                'invite_id' => $invite->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
 
         return $invite;
     }

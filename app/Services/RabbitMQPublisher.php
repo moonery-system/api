@@ -2,16 +2,19 @@
 
 namespace App\Services;
 
+use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
 class RabbitMQPublisher
 {
-    protected $connection;
-    protected $channel;
+    protected ?AMQPStreamConnection $connection = null;
+    protected ?AMQPChannel $channel = null;
 
-    public function __construct()
+    private function connect(): void
     {
+        if ($this->channel) return;
+
         $this->connection = new AMQPStreamConnection(
             env('RABBITMQ_HOST', 'localhost'),
             env('RABBITMQ_PORT', 5672),
@@ -32,6 +35,8 @@ class RabbitMQPublisher
 
     public function publish(string $routingKey, array $data)
     {
+        $this->connect();
+
         $message = new AMQPMessage(
             json_encode($data),
             ['content_type' => 'application/json', 'delivery_mode' => 2]
@@ -46,7 +51,7 @@ class RabbitMQPublisher
 
     public function __destruct()
     {
-        $this->channel->close();
-        $this->connection->close();
+        if ($this->channel) $this->channel->close();
+        if ($this->connection) $this->connection->close();
     }
 }
