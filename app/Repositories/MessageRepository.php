@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Contracts\Repositories\MessageInterface;
 use App\Models\Message;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -24,6 +25,16 @@ class MessageRepository implements MessageInterface
     public function findById(int $id): ?Message
     {
         return Message::with(['sender', 'conversation'])->find($id);
+    }
+
+    public function recentForConversation(int $conversationId, int $limit): Collection
+    {
+        return Message::where('conversation_id', $conversationId)
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get()
+            ->reverse()
+            ->values();
     }
 
     public function markInboundAsRead(int $conversationId): int

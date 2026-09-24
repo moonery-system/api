@@ -7,6 +7,7 @@ use App\Models\Delivery;
 use App\Models\DeliveryStatus;
 use App\Models\DeliveryStatusHistory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class DeliveryRepository implements DeliveryInterface
@@ -74,6 +75,25 @@ class DeliveryRepository implements DeliveryInterface
             ->paginate($perPage);
     }
 
+    public function findByIdForClient(int $id, int $clientId): ?Delivery
+    {
+        return $this->assistantQuery($clientId)->where('id', $id)->first();
+    }
+
+    public function findByTrackingCodeForClient(string $trackingCode, int $clientId): ?Delivery
+    {
+        return $this->assistantQuery($clientId)->where('tracking_code', $trackingCode)->first();
+    }
+
+    public function findByClientLimited(int $clientId, ?int $statusId, int $limit): Collection
+    {
+        $query = $this->assistantQuery($clientId)->latest();
+
+        if ($statusId) $query->where('delivery_status_id', $statusId);
+
+        return $query->limit($limit)->get();
+    }
+
     public function attachDeliveryman(int $id, int $deliverymanId, int $pendingStatusId, int $attachedStatusId): int
     {
         return Delivery::where('id', $id)
@@ -108,5 +128,15 @@ class DeliveryRepository implements DeliveryInterface
         }
 
         return $query;
+    }
+
+    /**
+     * Deliveries of one client, without the delivery man or the client themselves
+     * loaded: what the assistant does not need it cannot hand to the provider.
+     */
+    private function assistantQuery(int $clientId): Builder
+    {
+        return Delivery::with(['items', 'status', 'address', 'statusHistory.status'])
+            ->where('client_id', $clientId);
     }
 }

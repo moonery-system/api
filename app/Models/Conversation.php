@@ -11,8 +11,15 @@ class Conversation extends Model
 
     protected $table = 'conversations';
 
+    public const ASSISTANT_ACTIVE = 'active';
+    public const ASSISTANT_HANDED_OFF = 'handed_off';
+
     protected $fillable = [
         'user_id',
+    ];
+
+    protected $casts = [
+        'handed_off_at' => 'datetime',
     ];
 
     /**

@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\Repositories\AssistantPendingActionInterface;
+use App\Contracts\Repositories\AssistantRunInterface;
+use App\Contracts\Repositories\AssistantUsageInterface;
 use App\Contracts\Repositories\ClientAddressInterface;
 use App\Contracts\Repositories\ClientInterface;
 use App\Contracts\Repositories\ConversationInterface;
@@ -12,6 +15,9 @@ use App\Contracts\Repositories\LogInterface;
 use App\Contracts\Repositories\NotificationInterface;
 use App\Contracts\Repositories\RoleInterface;
 use App\Contracts\Repositories\UserInterface;
+use App\Repositories\AssistantPendingActionRepository;
+use App\Repositories\AssistantRunRepository;
+use App\Repositories\AssistantUsageRepository;
 use App\Repositories\ClientAddressRepository;
 use App\Repositories\ClientRepository;
 use App\Repositories\ConversationRepository;
@@ -33,6 +39,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->bind(
+            AssistantPendingActionInterface::class,
+            AssistantPendingActionRepository::class
+        );
+
+        $this->app->bind(
+            AssistantRunInterface::class,
+            AssistantRunRepository::class
+        );
+
+        $this->app->bind(
+            AssistantUsageInterface::class,
+            AssistantUsageRepository::class
+        );
+
         $this->app->bind(
             ClientAddressInterface::class,
             ClientAddressRepository::class

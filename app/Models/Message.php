@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Message extends Model
 {
@@ -41,5 +42,14 @@ class Message extends Model
     public function delivery()
     {
         return $this->belongsTo(Delivery::class);
+    }
+
+    /**
+     * The confirmation this message is asking for, when it is the assistant asking
+     * "do you confirm?".
+     */
+    public function pendingAction(): HasOne
+    {
+        return $this->hasOne(AssistantPendingAction::class);
     }
 }
