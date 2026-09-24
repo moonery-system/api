@@ -68,6 +68,11 @@ abstract class TestCase extends BaseTestCase
         return $this->userWithRole('Delivery Man');
     }
 
+    protected function support(): User
+    {
+        return $this->userWithRole('Support');
+    }
+
     /**
      * Authenticates on the api guard directly instead of minting a JWT.
      *
