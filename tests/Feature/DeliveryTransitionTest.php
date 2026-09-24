@@ -163,6 +163,35 @@ class DeliveryTransitionTest extends TestCase
         $this->assertSame($this->deliveryman->id, $delivery->refresh()->delivery_man_id);
     }
 
+    public function test_support_cancels_with_its_own_final_status(): void
+    {
+        $support = $this->support();
+        $delivery = $this->delivery(DeliveryStatusEnum::IN_TRANSIT, assigned: true);
+
+        $this->moveTo($delivery, 'canceled_by_support', $support)->assertOk();
+
+        $this->assertSame(
+            DeliveryStatusEnum::CANCELED_BY_SUPPORT->value,
+            $delivery->refresh()->status->name
+        );
+
+        // And it is final.
+        $this->moveTo($delivery, 'in_transit', $support)->assertStatus(409);
+    }
+
+    public function test_a_deliveryman_cannot_cancel_as_support(): void
+    {
+        $delivery = $this->delivery(DeliveryStatusEnum::IN_TRANSIT, assigned: true);
+
+        $this->moveTo($delivery, 'canceled_by_support', $this->deliveryman)
+            ->assertStatus(409);
+
+        $this->assertSame(
+            DeliveryStatusEnum::IN_TRANSIT->value,
+            $delivery->refresh()->status->name
+        );
+    }
+
     public function test_available_transitions_depend_on_who_is_asking(): void
     {
         $delivery = $this->delivery(DeliveryStatusEnum::IN_TRANSIT, assigned: true);
@@ -182,9 +211,15 @@ class DeliveryTransitionTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.available_transitions', []);
 
+        // The admin holds every permission, cancelAsSupport included, so both ways out
+        // show up. That is accepted: the status records which role the action was taken
+        // as, and logs records who actually took it.
         $this->actingAsUser($this->admin)
             ->getJson("/api/deliveries/{$delivery->id}")
             ->assertOk()
-            ->assertJsonPath('data.available_transitions', ['canceled_by_admin']);
+            ->assertJsonPath('data.available_transitions', [
+                'canceled_by_admin',
+                'canceled_by_support',
+            ]);
     }
 }
