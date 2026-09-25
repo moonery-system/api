@@ -149,3 +149,24 @@ encontrado, correção. Nada aqui é retroativo nem aspiracional.
   de seed; o caminho de confirmação real é coberto pelos testes de feature.
 - **Não testado ao vivo:** acesso à entrega de outro cliente (o dev só tem um cliente com
   entregas) — coberto só pelos testes automatizados; 429 real; teto diário real.
+
+## 2026-09-27 — falha real: tool call sem argumentos derrubava a segunda chamada
+
+- **Sintoma:** na pergunta "quais os meus pedidos?" o assistente caiu em fallback e encaminhou
+  ao Suporte (`provider_failure`). `assistant_runs` #10: `HTTP 400 INVALID_ARGUMENT: Unknown name
+  "args" at 'contents[7].parts[0].function_call': Proto field is not repeating, cannot start list`.
+- **Causa (bug meu):** `list_my_deliveries` é chamada sem argumentos e o Gemini devolve
+  `"args": {}`. Eu decodifico a resposta como array PHP, onde `{}` vira `[]`; ao devolver as
+  `parts` cruas na chamada seguinte, o `args` voltava como **lista** vazia e o provedor recusava.
+  A sonda de 26/09 não pegou porque a `get_delivery` usada nela tinha argumentos.
+- **Por que os testes não pegaram:** o teste do round-trip só usava `get_delivery` com argumentos.
+- **Correção:** `keepEmptyObjects()` devolve `functionCall.args` vazio como objeto ao guardar o
+  `providerState`. Teste de regressão com `"args": {}`; sem a correção ele falha.
+- **Lição:** "devolver as parts cruas" só é cru se a decodificação não perder a diferença entre
+  objeto e lista vazios. Vale para qualquer campo que seja objeto por contrato.
+- **Rótulo enganoso, não alterado:** o 400 é classificado como `LlmAuthException` (pedido do
+  escopo: 400/401/403 = erro de autenticação), mas aqui era um payload nosso inválido; o `error`
+  da execução mostra "LlmAuthException" mesmo assim. A mensagem inclui o detalhe do provedor,
+  que foi o que levou à causa.
+- **Efeito no dev:** a conversa 1 ficou `handed_off/provider_failure` (encaminhamento é
+  permanente na v1). O consumidor precisa ser reiniciado para carregar o código corrigido.

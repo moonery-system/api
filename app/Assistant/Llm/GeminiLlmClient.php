@@ -197,8 +197,28 @@ class GeminiLlmClient implements LlmClient
             toolCalls: $toolCalls,
             usage: new Usage($input, $output),
             finishReason: (string) ($candidate['finishReason'] ?? 'unknown'),
-            providerState: $parts ? ['parts' => $parts] : null,
+            providerState: $parts ? ['parts' => $this->keepEmptyObjects($parts)] : null,
         );
+    }
+
+    /**
+     * The parts are decoded as arrays, and an empty JSON object -- what a tool call without
+     * arguments carries as "args": {} -- decodes to an empty array, which encodes back as
+     * "[]". The provider rejects that ("cannot start list") when the parts are sent back, so
+     * the fields that are objects by contract are put back as objects.
+     *
+     * @param array<int, array<string, mixed>> $parts
+     * @return array<int, array<string, mixed>>
+     */
+    private function keepEmptyObjects(array $parts): array
+    {
+        foreach ($parts as &$part) {
+            if (isset($part['functionCall']) && ($part['functionCall']['args'] ?? null) === []) {
+                $part['functionCall']['args'] = new \stdClass();
+            }
+        }
+
+        return $parts;
     }
 
     private function errorFor(Response $response): \Throwable

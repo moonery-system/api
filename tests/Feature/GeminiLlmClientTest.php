@@ -132,6 +132,37 @@ class GeminiLlmClientTest extends TestCase
         });
     }
 
+    public function test_a_tool_call_without_arguments_goes_back_with_an_object_not_a_list(): void
+    {
+        // What the provider sends for list_my_deliveries: "args": {} -- PHP decodes it to [].
+        $this->fakeReply([
+            'candidates' => [[
+                'content' => ['role' => 'model', 'parts' => [[
+                    'functionCall' => ['name' => 'list_my_deliveries', 'args' => new \stdClass(), 'id' => 'call_9'],
+                    'thoughtSignature' => 'sig',
+                ]]],
+            ]],
+        ]);
+        $first = $this->gemini()->generate($this->llmRequest());
+
+        $this->assertTrue($first->hasToolCalls());
+        $this->assertSame([], $first->toolCalls[0]->arguments);
+
+        $this->fakeReply(['candidates' => [['content' => ['parts' => [['text' => 'ok']]]]]]);
+
+        $this->gemini()->generate($this->llmRequest([
+            LlmMessage::user('quais os meus pedidos?'),
+            LlmMessage::fromResponse($first),
+            LlmMessage::toolResults([new ToolResult('call_9', 'list_my_deliveries', ['count' => 0])]),
+        ]));
+
+        Http::assertSent(function (Request $request) {
+            // "[]" here is what made the provider answer 400 in the real conversation.
+            return str_contains($request->body(), '"functionCall":{"name":"list_my_deliveries","args":{}')
+                && !str_contains($request->body(), '"args":[]');
+        });
+    }
+
     public function test_the_request_carries_the_tools_the_system_prompt_and_the_token_limit(): void
     {
         $this->fakeReply(['candidates' => [['content' => ['parts' => [['text' => 'oi']]]]]]);
