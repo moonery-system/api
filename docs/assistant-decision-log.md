@@ -97,3 +97,29 @@ encontrado, correção. Nada aqui é retroativo nem aspiracional.
   Depois de uma exceção o consumidor faz `DB::reconnect()`, porque é um processo longo.
 - **phpstan nível 5:** 8 erros nos meus arquivos (genéricos de coleção/query sem `@return`,
   um `?->` em tipo não anulável). Corrigidos com anotações; zero erros, sem baseline.
+
+## 2026-09-27 — sonda real e ambiente de dev (com autorização do usuário)
+
+- **Banco de dev:** `php artisan migrate` (só as 4 migrations do assistente) e
+  `db:seed --class=AssistantSeeder`, com autorização explícita. Sem isso o chat do dev quebraria:
+  o `./api` é montado nos contêineres e o código já consulta as tabelas novas.
+- **Problema (achado só no dev):** o `AssistantSeeder` falhou no banco existente com
+  `column "updated_at" of relation "roles" does not exist`. As tabelas `roles`/`permissions` não
+  têm timestamps, e o `firstOrCreate` do Eloquent os escreve. Os testes não pegaram porque
+  `seedDomain()` já cria o papel e a permissão, então o `firstOrCreate` só *encontrava* — o caminho
+  "banco já existente" nunca era exercitado. **Correção:** `insert()` como os outros seeders, e um
+  teste que apaga papel/permissão/bot e roda só o seeder; ele falha no seeder antigo e passa no novo.
+- **Problema (na sonda):** a primeira tentativa usou `php artisan tinker <arquivo>`, que prendeu
+  esperando o REPL; nenhuma chamada saiu (a tabela de uso ficou vazia). Refeita com um bootstrap
+  direto do Laravel e `timeout`.
+- **Sonda Gemini** (modelo `gemini-3.1-flash-lite`, prompt sintético com código de seed, 2 chamadas):
+  - `generateContent` com function calling funciona; o Gemini **aceitou os schemas das 5
+    ferramentas** como escritos.
+  - O `functionCall` traz `id` (`call_…`) e a **`thoughtSignature` está na própria parte
+    `functionCall`** (156 caracteres). A parte de texto da resposta final também traz uma.
+  - Devolver as `parts` cruas do turno do modelo + `functionResponse` com o mesmo `id` foi aceito.
+  - **Não testei** se omitir a assinatura seria recusado (custaria uma terceira chamada real); o
+    design de devolver as `parts` intactas cobre os dois casos.
+  - **Não observei nenhum 429**, então o formato do erro/`retryDelay` segue confirmado só por
+    teste com `Http::fake`, escrito a partir da documentação.
+  - Custo: ~1000 tokens de entrada por chamada (sistema + 5 ferramentas), 22–28 de saída.
