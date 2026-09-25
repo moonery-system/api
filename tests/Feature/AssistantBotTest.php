@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\AssistantSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -67,5 +69,30 @@ class AssistantBotTest extends TestCase
         $this->seed(AssistantSeeder::class);
 
         $this->assertSame(1, User::where('email', config('assistant.bot_email'))->count());
+    }
+
+    /**
+     * The path a database that already exists takes: it has the roles and permissions of
+     * before the assistant, and only this seeder is run. seedDomain() hides it, because it
+     * seeds the role and the permission first -- this is the case that once broke for real.
+     */
+    public function test_the_seeder_brings_an_existing_database_up_to_date(): void
+    {
+        User::where('email', config('assistant.bot_email'))->firstOrFail()->forceDelete();
+        Role::where('name', 'Assistant')->delete();
+        Permission::where('permission', 'assistant.use')->delete();
+
+        $this->assertFalse(Permission::where('permission', 'assistant.use')->exists());
+
+        $this->seed(AssistantSeeder::class);
+
+        $this->assertTrue(Role::where('name', 'Assistant')->exists());
+        $this->assertTrue($this->client()->hasPermission('assistant.use'));
+        $this->assertTrue($this->admin()->hasPermission('assistant.use'));
+        $this->assertFalse($this->support()->hasPermission('assistant.use'));
+
+        $bot = $this->bot();
+        $this->assertSame(['Assistant'], $bot->roles->pluck('name')->all());
+        $this->assertCount(0, $bot->permissions());
     }
 }

@@ -23,9 +23,16 @@ class AssistantSeeder extends Seeder
 {
     public function run()
     {
-        $botRole = Role::firstOrCreate(['name' => 'Assistant']);
+        // roles and permissions have no timestamps, so Eloquent's firstOrCreate() cannot
+        // insert them (it writes created_at/updated_at): the other seeders use insert() too.
+        if (!Role::where('name', 'Assistant')->exists()) Role::insert([['name' => 'Assistant']]);
 
-        $permission = Permission::firstOrCreate(['permission' => 'assistant.use']);
+        if (!Permission::where('permission', 'assistant.use')->exists()) {
+            Permission::insert([['permission' => 'assistant.use']]);
+        }
+
+        $botRole = Role::where('name', 'Assistant')->firstOrFail();
+        $permission = Permission::where('permission', 'assistant.use')->firstOrFail();
 
         // Who may talk to the assistant: the clients (and the admin, who has everything).
         foreach (['Client', 'Admin'] as $roleName) {
