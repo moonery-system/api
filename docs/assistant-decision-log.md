@@ -123,3 +123,29 @@ encontrado, correção. Nada aqui é retroativo nem aspiracional.
   - **Não observei nenhum 429**, então o formato do erro/`retryDelay` segue confirmado só por
     teste com `Http::fake`, escrito a partir da documentação.
   - Custo: ~1000 tokens de entrada por chamada (sistema + 5 ferramentas), 22–28 de saída.
+
+## 2026-09-27 — primeiro teste de ponta a ponta (dev, só dados de seed)
+
+- Consumidor `assistant-consumer` no ar (fila `assistant.queue`, 1 consumidor). Login como
+  `client@gmail.com`, conversa `me`, mensagem "Onde está a minha entrega MNY-2026-SEED01?".
+- **Problema:** o assistente **encaminhou ao Suporte** (3 iterações, motivo do próprio modelo:
+  "consta como attached") em vez de responder. Não era bug de código: a ferramenta devolveu a
+  entrega certa. O prompt não dizia que, sem GPS, o **status é a resposta** a "onde está?", nem o
+  que cada status significa, e o rótulo do status no banco é um texto em inglês meio truncado.
+  **Correção:** o prompt ganhou (1) a regra de que "onde está" se responde com o status em
+  palavras simples e que faltar localização não é motivo de encaminhar, e (2) um glossário dos 11
+  status. É contexto geral do domínio, não uma regra escrita para esse caso.
+- **Reteste:** respondeu ("um entregador já selecionou o pacote, mas ainda não realizou a
+  coleta"), 2 iterações, ~6 s, 2915 tokens de entrada / 69 de saída. **Ressalva honesta:** ele
+  ainda cita o nome cru `"attached"` entre aspas, apesar do prompt pedir palavras simples. Um
+  teste com uma única pergunta não prova que o prompt está bom; o golden set (fase 2) é o que
+  mediria isso.
+- Para repetir o teste tive de devolver a conversa 1 do dev a `active` (o encaminhamento é
+  permanente na v1) com um `UPDATE` só nessa linha.
+- **Cancelamento:** "Quero cancelar a entrega MNY-2026-SEED02" → o assistente respondeu com o
+  texto **fixo** de confirmação, com a ação pendente ligada à mensagem (`pending_action` no
+  payload da conversa). **Rejeitei** pelo endpoint (a entrega seguiu `pending`) e, ao tentar
+  confirmar depois, veio 409. **Não confirmei de verdade no dev** para não cancelar uma entrega
+  de seed; o caminho de confirmação real é coberto pelos testes de feature.
+- **Não testado ao vivo:** acesso à entrega de outro cliente (o dev só tem um cliente com
+  entregas) — coberto só pelos testes automatizados; 429 real; teto diário real.
