@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     libpq-dev
 
-RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath xml
+# sockets: declarada por php-amqplib. Sem ela o composer barra qualquer require.
+RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath xml sockets
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
