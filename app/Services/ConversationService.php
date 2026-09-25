@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Assistant\AssistantDispatcher;
 use App\Contracts\Repositories\ConversationInterface;
 use App\Contracts\Repositories\MessageInterface;
 use App\Contracts\Repositories\UserInterface;
 use App\Enums\LogEventTypeEnum;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ConversationService
@@ -22,7 +24,8 @@ class ConversationService
         private UserInterface $userRepository,
 
         private LogService $logService,
-        private RabbitMQPublisher $publisher
+        private RabbitMQPublisher $publisher,
+        private AssistantDispatcher $assistantDispatcher
     ) {}
 
     /**
@@ -72,13 +75,44 @@ class ConversationService
 
         if (!$conversation) return null;
 
-        $senderId = auth()->id();
+        $sender = auth()->user();
 
+        $message = $this->storeAndPublish(
+            conversation: $conversation,
+            senderId: $sender->id,
+            body: $validated['body'],
+            deliveryId: $validated['delivery_id'] ?? null
+        );
+
+        // After the message is safely stored and published: the assistant either has
+        // something to answer, or a human just took the conversation over.
+        $this->assistantDispatcher->afterMessageSent(conversation: $conversation, message: $message, sender: $sender);
+
+        return $this->messageRepository->findById($message->id);
+    }
+
+    /**
+     * A message written by the assistant. There is no authenticated user on this path (it
+     * runs in the consumer), so the sender is explicit and nothing here reads auth().
+     * The dispatcher is deliberately not called: the bot never triggers itself.
+     */
+    public function sendAsAssistant(Conversation $conversation, User $bot, string $body, ?int $deliveryId = null): Message
+    {
+        return $this->storeAndPublish(
+            conversation: $conversation,
+            senderId: $bot->id,
+            body: $body,
+            deliveryId: $deliveryId
+        );
+    }
+
+    private function storeAndPublish(Conversation $conversation, int $senderId, string $body, ?int $deliveryId): Message
+    {
         $message = $this->messageRepository->create([
             'conversation_id' => $conversation->id,
             'sender_id' => $senderId,
-            'delivery_id' => $validated['delivery_id'] ?? null,
-            'body' => $validated['body'],
+            'delivery_id' => $deliveryId,
+            'body' => $body,
         ]);
 
         // Keeps the inbox ordered by activity.
@@ -87,11 +121,11 @@ class ConversationService
         $this->logService->record(eventType: LogEventTypeEnum::MESSAGE_SENT, context: [
             'conversation_id' => $conversation->id,
             'message_id' => $message->id,
-        ]);
+        ], userId: $senderId);
 
         $this->publishToWebsocket(conversation: $conversation, message: $message, senderId: $senderId);
 
-        return $this->messageRepository->findById($message->id);
+        return $message;
     }
 
     public function markAsRead(int $conversationId): bool

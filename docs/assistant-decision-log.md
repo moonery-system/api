@@ -58,3 +58,21 @@ encontrado, correção. Nada aqui é retroativo nem aspiracional.
   deviam; restaurei o arquivo.
 - **Problema:** `run()` colidia com o método do PHPUnit (mesma família do `client()` anterior).
   Renomeado.
+- **`AssistantRunner`** (o laço de ferramentas) e **`AssistantDispatcher`** (decide se enfileira ou
+  silencia). `ConversationService::sendAsAssistant()` grava a mensagem do bot sem `auth()`; a
+  lógica de gravar+publicar foi extraída para `storeAndPublish()` e é a mesma nos dois caminhos.
+  O bot não dispara a si mesmo (o dispatcher não é chamado nesse caminho).
+- **Decisão:** quando há confirmação de cancelamento pendente, o texto da resposta é **fixo**
+  (config), não o do modelo. Assim o modelo não consegue dizer ao cliente que algo foi cancelado
+  quando só foi perguntado. O teste de injeção em resultado de ferramenta usa um modelo
+  totalmente obediente ("Cancelei tudo!") e prova que a resposta ao cliente não contém isso e
+  que a entrega segue `pending`.
+- **Decisão:** toda falha (provedor, autenticação, 429 esgotado, teto diário, prazo, limite por
+  usuário, teto de iterações, resposta vazia) termina igual: mensagem fixa de fallback +
+  `handed_off` com o motivo. Uma confirmação criada antes da falha é descartada (`superseded`).
+- **Decisão:** chamadas de ferramenta em paralelo: só as 5 primeiras são executadas, as demais
+  recebem um resultado de erro (o provedor exige uma resposta para cada chamada).
+- `ASSISTANT_ENABLED=false` no `phpunit.xml`; os testes do assistente ligam com `config()->set`.
+- **Verificação por mutação** dos testes do runner (eles passaram de primeira): removi a
+  idempotência → 2 falhas; tornei a elegibilidade sempre verdadeira → 2 falhas (silêncio); deixei
+  o texto do modelo prevalecer sobre a confirmação → 2 falhas. Arquivo restaurado depois de cada.

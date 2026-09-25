@@ -27,4 +27,9 @@ enum LogEventTypeEnum: string
     case DELIVERY_ITEMS_CREATED = 'delivery_items_created';
 
     case MESSAGE_SENT = 'message_sent';
+
+    case ASSISTANT_REPLIED = 'assistant_replied';
+    case ASSISTANT_HANDOFF = 'assistant_handoff';
+    case ASSISTANT_CANCEL_CONFIRMED = 'assistant_cancel_confirmed';
+    case ASSISTANT_CANCEL_REJECTED = 'assistant_cancel_rejected';
 }

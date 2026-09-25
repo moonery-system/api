@@ -50,6 +50,8 @@ return [
     'messages' => [
         'fallback' => 'Não consegui resolver isso agora. Encaminhei a sua conversa ao Suporte, que responde em breve.',
         'handoff' => 'Vou encaminhar a sua conversa ao Suporte, que responde em breve.',
+        // :tracking_code is replaced by the code of the delivery.
+        'confirm_cancel' => 'Confirma o cancelamento da entrega :tracking_code? Use os botões abaixo para confirmar ou manter a entrega.',
     ],
 
     /*

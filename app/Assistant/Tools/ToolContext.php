@@ -15,6 +15,7 @@ use App\Models\User;
 class ToolContext
 {
     public ?int $pendingActionId = null;
+    public ?int $pendingDeliveryId = null;
     public ?string $pendingTrackingCode = null;
 
     public ?string $handoffNote = null;

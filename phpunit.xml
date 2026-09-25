@@ -19,6 +19,9 @@
     </coverage>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- O assistente e opt-in nos testes: quem o exercita liga com config()->set. Assim os
+             testes de chat existentes seguem afirmando so o chat. -->
+        <env name="ASSISTANT_ENABLED" value="false"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>
         <!-- Banco de teste dedicado. Sem isto o RefreshDatabase apaga o banco de

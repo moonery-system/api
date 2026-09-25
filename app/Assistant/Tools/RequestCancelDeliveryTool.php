@@ -81,6 +81,7 @@ class RequestCancelDeliveryTool extends ValidatedTool
         ]);
 
         $context->pendingActionId = $action->id;
+        $context->pendingDeliveryId = $delivery->id;
         $context->pendingTrackingCode = $delivery->tracking_code;
 
         return [
