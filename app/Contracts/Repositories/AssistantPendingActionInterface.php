@@ -24,5 +24,11 @@ interface AssistantPendingActionInterface
      */
     public function claimPending(int $id, int $userId): int;
 
+    /**
+     * pending -> expired, only when it is still pending AND past its expiry. A no-op for
+     * anything else, so it can never overwrite the answer of a click that won the race.
+     */
+    public function expireIfDue(int $id): int;
+
     public function resolve(int $id, string $status, ?string $error = null): int;
 }

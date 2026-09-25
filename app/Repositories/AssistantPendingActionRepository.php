@@ -48,6 +48,19 @@ class AssistantPendingActionRepository implements AssistantPendingActionInterfac
             ]);
     }
 
+    public function expireIfDue(int $id): int
+    {
+        $now = Carbon::now();
+
+        return AssistantPendingAction::where('id', $id)
+            ->where('status', AssistantPendingAction::STATUS_PENDING)
+            ->where('expires_at', '<=', $now)
+            ->update([
+                'status' => AssistantPendingAction::STATUS_EXPIRED,
+                'resolved_at' => $now,
+            ]);
+    }
+
     public function resolve(int $id, string $status, ?string $error = null): int
     {
         return AssistantPendingAction::where('id', $id)->update([

@@ -76,3 +76,17 @@ encontrado, correção. Nada aqui é retroativo nem aspiracional.
 - **Verificação por mutação** dos testes do runner (eles passaram de primeira): removi a
   idempotência → 2 falhas; tornei a elegibilidade sempre verdadeira → 2 falhas (silêncio); deixei
   o texto do modelo prevalecer sobre a confirmação → 2 falhas. Arquivo restaurado depois de cada.
+- **Confirmação** em `POST /api/assistant/actions/{id}/confirm|reject` (`can:deliveries.cancel`).
+  Confirmar faz claim atômico (`pending → confirmed`, só se não expirou) e chama
+  `DeliveryService::cancelDelivery()` — o mesmo caminho do cancelamento manual, então o validador
+  barra `picked_up`/`in_transit`/`delivered` (409, ação `failed`, entrega intocada). Um "sim"
+  digitado no chat não cancela (teste com o runner de ponta a ponta).
+- **Problema (meu):** na primeira versão, quando o claim falhava eu marcava a ação como `expired`
+  incondicionalmente. Se o clique perdedor chegasse depois do vencedor, sobrescreveria `confirmed`
+  com `expired`. **Correção:** `expireIfDue()`, condicional (só `pending` e vencida).
+- **Problema (nos testes):** a mutação "claim sem condição de status" **sobreviveu** aos testes
+  de endpoint, porque o service checa o status antes de reivindicar e isso mascara a condição do
+  claim em testes sequenciais; contra dois cliques simultâneos, só o update condicional protege.
+  **Correção:** testes direto no repositório para o claim e para `expireIfDue`; repeti as
+  mutações e agora falham. Também troquei uma asserção minha ilegível (`count() - 0 ? 1 : 0`) por
+  uma que diz o que quer dizer.

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssistantActionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientAddressController;
 use App\Http\Controllers\ClientController;
@@ -44,6 +45,13 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/conversations/{id}', 'show');
         Route::post('/conversations/{id}/messages', 'storeMessage');
         Route::put('/conversations/{id}/read', 'markAsRead');
+    });
+
+    //assistant routes -- the customer's answer to a confirmation the assistant asked for.
+    //Only these run the cancellation; nothing typed in the chat does.
+    Route::controller(AssistantActionController::class)->group(function () {
+        Route::post('/assistant/actions/{id}/confirm', 'confirm')->middleware('can:deliveries.cancel');
+        Route::post('/assistant/actions/{id}/reject', 'reject')->middleware('can:deliveries.cancel');
     });
 
     //notifications routes -- recurso proprio do usuario, sem permissao
