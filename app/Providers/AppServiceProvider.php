@@ -28,6 +28,7 @@ use App\Repositories\LogRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
+use App\Assistant\AssistantBot;
 use App\Assistant\Llm\GeminiLlmClient;
 use App\Assistant\Llm\GuardedLlmClient;
 use App\Assistant\Llm\LlmClient;
@@ -51,6 +52,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton(AssistantBot::class);
+
         $this->app->singleton(SystemClock::class);
         $this->app->bind(Clock::class, SystemClock::class);
         $this->app->bind(Sleeper::class, SystemClock::class);

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Assistant\AssistantBot;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,6 +31,14 @@ class Message extends Model
         'read_at' => 'datetime',
     ];
 
+    /**
+     * Serialized with every message, so a screen can tell the assistant from a human of
+     * support without knowing the bot's name or e-mail.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = ['is_assistant'];
+
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(Conversation::class);
@@ -52,5 +61,12 @@ class Message extends Model
     public function pendingAction(): HasOne
     {
         return $this->hasOne(AssistantPendingAction::class);
+    }
+
+    public function getIsAssistantAttribute(): bool
+    {
+        $botId = app(AssistantBot::class)->id();
+
+        return $botId !== null && (int) $this->sender_id === $botId;
     }
 }
