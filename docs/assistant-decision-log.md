@@ -90,3 +90,10 @@ encontrado, correção. Nada aqui é retroativo nem aspiracional.
   **Correção:** testes direto no repositório para o claim e para `expireIfDue`; repeti as
   mutações e agora falham. Também troquei uma asserção minha ilegível (`count() - 0 ? 1 : 0`) por
   uma que diz o que quer dizer.
+- **Consumidor** `customs:consume-assistant` (fila própria `assistant.queue`, routing key
+  `assistant.requests`, prefetch 1, sempre `ack`) e serviço `assistant-consumer` no
+  `docker-compose.yml` (repo de infra, commit à parte). `process()` não escreve no console: a
+  primeira versão escrevia e quebrou quando chamada fora do artisan ("writeln() on null").
+  Depois de uma exceção o consumidor faz `DB::reconnect()`, porque é um processo longo.
+- **phpstan nível 5:** 8 erros nos meus arquivos (genéricos de coleção/query sem `@return`,
+  um `?->` em tipo não anulável). Corrigidos com anotações; zero erros, sem baseline.

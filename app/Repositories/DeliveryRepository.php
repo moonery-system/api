@@ -85,6 +85,9 @@ class DeliveryRepository implements DeliveryInterface
         return $this->assistantQuery($clientId)->where('tracking_code', $trackingCode)->first();
     }
 
+    /**
+     * @return Collection<int, Delivery>
+     */
     public function findByClientLimited(int $clientId, ?int $statusId, int $limit): Collection
     {
         $query = $this->assistantQuery($clientId)->latest();
@@ -133,6 +136,9 @@ class DeliveryRepository implements DeliveryInterface
     /**
      * Deliveries of one client, without the delivery man or the client themselves
      * loaded: what the assistant does not need it cannot hand to the provider.
+     */
+    /**
+     * @return Builder<Delivery>
      */
     private function assistantQuery(int $clientId): Builder
     {

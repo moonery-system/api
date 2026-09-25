@@ -46,7 +46,7 @@ class DeliveryPresenter
             ] : null,
             'history' => $delivery->statusHistory->take(-20)->map(fn($step) => [
                 'status' => $step->status->name,
-                'at' => $step->created_at?->toIso8601String(),
+                'at' => $step->created_at->toIso8601String(),
             ])->values()->all(),
         ];
     }

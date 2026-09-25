@@ -28,6 +28,9 @@ interface DeliveryInterface
      */
     public function findByIdForClient(int $id, int $clientId): ?Delivery;
     public function findByTrackingCodeForClient(string $trackingCode, int $clientId): ?Delivery;
+    /**
+     * @return Collection<int, Delivery>
+     */
     public function findByClientLimited(int $clientId, ?int $statusId, int $limit): Collection;
 
     public function attachDeliveryman(int $id, int $deliverymanId, int $pendingStatusId, int $attachedStatusId): int;

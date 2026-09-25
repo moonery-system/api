@@ -27,6 +27,9 @@ class MessageRepository implements MessageInterface
         return Message::with(['sender', 'conversation'])->find($id);
     }
 
+    /**
+     * @return Collection<int, Message>
+     */
     public function recentForConversation(int $conversationId, int $limit): Collection
     {
         return Message::where('conversation_id', $conversationId)

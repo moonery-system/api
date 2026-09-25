@@ -13,6 +13,9 @@ interface MessageInterface
     /**
      * The latest messages of a conversation, oldest first.
      */
+    /**
+     * @return Collection<int, Message>
+     */
     public function recentForConversation(int $conversationId, int $limit): Collection;
 
     public function markInboundAsRead(int $conversationId): int;
