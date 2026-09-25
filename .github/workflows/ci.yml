@@ -45,6 +45,9 @@ jobs:
       - name: Lint
         run: find app database routes config -name '*.php' -print0 | xargs -0 -n1 -P4 php -l > /dev/null
 
+      - name: Static analysis
+        run: composer analyse
+
       # The database name and driver come from phpunit.xml; only the connection
       # details belong here.
       - name: Tests
