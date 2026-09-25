@@ -31,6 +31,12 @@ use App\Repositories\UserRepository;
 use App\Assistant\Llm\GeminiLlmClient;
 use App\Assistant\Llm\GuardedLlmClient;
 use App\Assistant\Llm\LlmClient;
+use App\Assistant\Tools\CanCancelDeliveryTool;
+use App\Assistant\Tools\GetDeliveryTool;
+use App\Assistant\Tools\HandoffToSupportTool;
+use App\Assistant\Tools\ListMyDeliveriesTool;
+use App\Assistant\Tools\RequestCancelDeliveryTool;
+use App\Assistant\ToolRegistry;
 use App\Assistant\Support\Clock;
 use App\Assistant\Support\Sleeper;
 use App\Assistant\Support\SystemClock;
@@ -74,6 +80,14 @@ class AppServiceProvider extends ServiceProvider
                 dailyTokenCap: config('assistant.daily_token_cap'),
             );
         });
+
+        $this->app->bind(ToolRegistry::class, fn($app) => new ToolRegistry([
+            $app->make(ListMyDeliveriesTool::class),
+            $app->make(GetDeliveryTool::class),
+            $app->make(CanCancelDeliveryTool::class),
+            $app->make(RequestCancelDeliveryTool::class),
+            $app->make(HandoffToSupportTool::class),
+        ]));
 
         $this->app->bind(
             AssistantPendingActionInterface::class,

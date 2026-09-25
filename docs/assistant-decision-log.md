@@ -45,3 +45,16 @@ encontrado, correção. Nada aqui é retroativo nem aspiracional.
   primeira resposta. **Correção:** o helper de teste recria a factory a cada stub. O código de
   produção não mudou. (Antes disso, um conflito de nome: `client()` do meu teste colidia com o
   `client()` da `TestCase`.)
+- **Ferramentas** (`list_my_deliveries`, `get_delivery`, `can_cancel_delivery`,
+  `request_cancel_delivery`, `handoff_to_support`) atrás de um `ToolRegistry`. O usuário vem do
+  `ToolContext` (da conversa). `ValidatedTool` entrega ao `handle()` só as chaves que as regras
+  mencionam, então um `client_id` forjado morre na validação e, de qualquer forma, nenhuma
+  ferramenta o lê. Entrega alheia e entrega inexistente devolvem exatamente o mesmo conteúdo.
+- **Decisão:** as ferramentas não escrevem no chat; registram o efeito no `ToolContext`
+  (confirmação pendente, pedido de handoff) e o runner age. Assim o encaminhamento acontece num
+  lugar só, pedido pelo modelo ou forçado por um limite.
+- **Verificação dos testes de segurança:** eles passaram de primeira, o que não prova nada. Removi
+  temporariamente o `where('client_id', ...)` do repositório: 4 testes de escopo falharam, como
+  deviam; restaurei o arquivo.
+- **Problema:** `run()` colidia com o método do PHPUnit (mesma família do `client()` anterior).
+  Renomeado.
