@@ -20,7 +20,6 @@ class NotificationDescriptionFactory
             NotificationTitleEnum::DELIVERY_CREATED_DELIVERY_MAN => new DeliveryCreatedDeliverymanDescription(),
             NotificationTitleEnum::DELIVERY_STATUS_UPDATE_CLIENT => new DeliveryStatusUpdateDescription(),
             NotificationTitleEnum::DELIVERY_ASSIGNED_DELIVERY_MAN => new DeliveryAssignedDeliverymanDescription(),
-            default => throw new \InvalidArgumentException('no description strategy'),
         };
     }
 }

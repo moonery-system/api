@@ -42,7 +42,8 @@ class RabbitMQConsumer
             $this->channel->queue_bind($queue, 'delivery.events', $routingKey);
         }
 
-        $this->channel->basic_qos(null, 1, false);
+        // prefetch_size 0 = sem limite de bytes; o que limita e o prefetch_count.
+        $this->channel->basic_qos(0, 1, false);
 
         $this->channel->basic_consume(
             $queue,

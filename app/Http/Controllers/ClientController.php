@@ -7,7 +7,6 @@ use App\Http\Requests\AddressRequest;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Services\ClientService;
-use App\Services\UserService;
 use App\Utils\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,7 +16,6 @@ class ClientController extends Controller
     public function __construct(
         private ClientInterface $clientRepository,
 
-        private UserService $userService,
         private ClientService $clientService
     ) {}
 

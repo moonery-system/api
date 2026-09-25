@@ -10,6 +10,9 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
+/**
+ * @extends Factory<Delivery>
+ */
 class DeliveryFactory extends Factory
 {
     protected $model = Delivery::class;

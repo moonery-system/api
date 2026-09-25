@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DeliveryStatusHistory extends Model
 {
@@ -22,17 +23,17 @@ class DeliveryStatusHistory extends Model
         'user_id',
     ];
 
-    public function delivery()
+    public function delivery(): BelongsTo
     {
         return $this->belongsTo(Delivery::class);
     }
 
-    public function status()
+    public function status(): BelongsTo
     {
         return $this->belongsTo(DeliveryStatus::class, 'delivery_status_id');
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

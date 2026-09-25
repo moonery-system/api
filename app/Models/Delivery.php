@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Delivery extends Model
 {
@@ -22,32 +24,32 @@ class Delivery extends Model
         'delivered_at',
     ];
 
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(DeliveryItems::class);
     }
 
-    public function address()
+    public function address(): BelongsTo
     {
         return $this->belongsTo(ClientAddress::class, 'client_address_id');
     }
 
-    public function client()
+    public function client(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_id');
     }
 
-    public function deliveryman()
+    public function deliveryman(): BelongsTo
     {
         return $this->belongsTo(User::class, 'delivery_man_id');
     }
 
-    public function status()
+    public function status(): BelongsTo
     {
         return $this->belongsTo(DeliveryStatus::class, 'delivery_status_id');
     }
 
-    public function statusHistory()
+    public function statusHistory(): HasMany
     {
         return $this->hasMany(DeliveryStatusHistory::class)->oldest();
     }

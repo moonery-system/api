@@ -6,6 +6,9 @@ use App\Models\Delivery;
 use App\Models\DeliveryItems;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<DeliveryItems>
+ */
 class DeliveryItemsFactory extends Factory
 {
     protected $model = DeliveryItems::class;

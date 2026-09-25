@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DeliveryItems extends Model
 {
@@ -19,7 +20,7 @@ class DeliveryItems extends Model
         'weight'
     ];
 
-    public function delivery()
+    public function delivery(): BelongsTo
     {
         return $this->belongsTo(Delivery::class);
     }

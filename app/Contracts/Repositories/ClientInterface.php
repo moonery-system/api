@@ -7,7 +7,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 interface ClientInterface
 {
-    public function findAll(): LengthAwarePaginator;
+    public function findAll(int $perPage = 10): LengthAwarePaginator;
     public function findById(int $id): ?User;
-    public function findBySearch(string $search): LengthAwarePaginator;
+    public function findBySearch(string $search, int $perPage = 10): LengthAwarePaginator;
 }

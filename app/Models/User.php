@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -42,7 +44,7 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
     ];
 
-    public function roles()
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_roles');
     }
@@ -57,9 +59,11 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+    private ?\Illuminate\Support\Collection $permissionsCache = null;
+
     public function hasPermission($permission)
     {
-        if (!isset($this->permissionsCache)) {
+        if ($this->permissionsCache === null) {
             $this->permissionsCache = $this->roles()
                 ->with('permissions')
                 ->get()
@@ -81,12 +85,12 @@ class User extends Authenticatable implements JWTSubject
             ->unique('id');
     }
 
-    public function clientAddress()
+    public function clientAddress(): HasMany
     {
         return $this->hasMany(ClientAddress::class);
     }
 
-    public function notifications()
+    public function notifications(): BelongsToMany
     {
         return $this->belongsToMany(Notification::class, 'user_notifications')
             ->withPivot('read_at');

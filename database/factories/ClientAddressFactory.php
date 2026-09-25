@@ -6,6 +6,9 @@ use App\Models\ClientAddress;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<ClientAddress>
+ */
 class ClientAddressFactory extends Factory
 {
     protected $model = ClientAddress::class;

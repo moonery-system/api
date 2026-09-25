@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Contracts\Repositories\NotificationInterface;
-use App\Contracts\Repositories\RoleInterface;
 use App\Contracts\Repositories\UserInterface;
 use App\Factories\NotificationDescriptionFactory;
 use App\Enums\NotificationTitleEnum;
@@ -15,7 +14,6 @@ class NotificationService
 {
     public function __construct(
         private UserInterface $userRepository,
-        private RoleInterface $roleRepository,
         private NotificationInterface $notificationRepository,
 
         private NotificationDescriptionFactory $descriptionFactory,
