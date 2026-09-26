@@ -7,11 +7,13 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class RabbitMQConsumer
 {
-    protected AMQPStreamConnection $connection;
-    protected AMQPChannel $channel;
+    protected ?AMQPStreamConnection $connection = null;
+    protected ?AMQPChannel $channel = null;
 
-    public function __construct()
+    private function connect(): void
     {
+        if ($this->channel) return;
+
         $this->connection = new AMQPStreamConnection(
             env('RABBITMQ_HOST', 'localhost'),
             env('RABBITMQ_PORT', 5672),
@@ -32,6 +34,8 @@ class RabbitMQConsumer
 
     public function consume(string $queue, array $routingKeys, callable $handler): void
     {
+        $this->connect();
+
         $this->channel->queue_declare($queue, false, true, false, false);
 
         foreach ($routingKeys as $routingKey) {
@@ -57,7 +61,7 @@ class RabbitMQConsumer
 
     public function close(): void
     {
-        $this->channel->close();
-        $this->connection->close();
+        if ($this->channel) $this->channel->close();
+        if ($this->connection) $this->connection->close();
     }
 }
