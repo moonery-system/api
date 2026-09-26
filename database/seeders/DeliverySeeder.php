@@ -7,6 +7,7 @@ use App\Models\Delivery;
 use App\Models\DeliveryItems;
 use App\Models\DeliveryStatus;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -45,8 +46,9 @@ class DeliverySeeder extends Seeder
             ],
         ];
 
-        foreach ($deliveries as $items) {
+        foreach ($deliveries as $index => $items) {
             $delivery = Delivery::create([
+                'tracking_code' => 'MNY-' . Carbon::now()->year . '-SEED' . str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
                 'creator_id' => $admin->id,
                 'client_id' => $client->id,
                 'client_address_id' => $address->id,
