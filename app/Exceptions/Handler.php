@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Utils\ApiResponse;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -43,6 +44,10 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
+        $this->renderable(function (BusinessException $e) {
+            return ApiResponse::conflict($e->getMessage());
+        });
+
         $this->reportable(function (Throwable $e) {
             //
         });

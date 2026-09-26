@@ -40,6 +40,11 @@ class ApiResponse
         return self::error($message, 403);
     }
 
+    public static function conflict(string $message = 'Conflict'): JsonResponse
+    {
+        return self::error($message, 409);
+    }
+
     public static function serverError(string $message = 'ServerError'): JsonResponse
     {
         return self::error($message, 500);
