@@ -8,4 +8,5 @@ enum NotificationTitleEnum: string
     case DELIVERY_STATUS_UPDATE_CLIENT = 'The status of your delivery has been updated!';
 
     case DELIVERY_CREATED_DELIVERY_MAN = 'A new delivery has been created!';
+    case DELIVERY_ASSIGNED_DELIVERY_MAN = 'A delivery has been assigned to you!';
 }

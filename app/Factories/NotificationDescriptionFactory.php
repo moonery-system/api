@@ -4,6 +4,7 @@ namespace App\Factories;
 
 use App\Enums\NotificationTitleEnum;
 use App\Notifications\Strategies\{
+    DeliveryAssignedDeliverymanDescription,
     DeliveryCreatedClientDescription,
     DeliveryCreatedDeliverymanDescription,
     DeliveryStatusUpdateDescription,
@@ -18,6 +19,7 @@ class NotificationDescriptionFactory
             NotificationTitleEnum::DELIVERY_CREATED_CLIENT => new DeliveryCreatedClientDescription(),
             NotificationTitleEnum::DELIVERY_CREATED_DELIVERY_MAN => new DeliveryCreatedDeliverymanDescription(),
             NotificationTitleEnum::DELIVERY_STATUS_UPDATE_CLIENT => new DeliveryStatusUpdateDescription(),
+            NotificationTitleEnum::DELIVERY_ASSIGNED_DELIVERY_MAN => new DeliveryAssignedDeliverymanDescription(),
             default => throw new \InvalidArgumentException('no description strategy'),
         };
     }
