@@ -55,7 +55,11 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/deliveries', 'index')->middleware('can:deliveries.viewAny');
         Route::post('/deliveries', 'store')->middleware('can:deliveries.create');
         Route::get('/deliveries/{id}', 'show')->middleware('can:deliveries.view');
-        Route::put('/deliveries/update-status/{id}', 'updateStatus')->middleware('can:deliveries.update');
+        Route::put('/deliveries/{id}/status', 'updateStatus')->middleware('can:deliveries.update');
+        Route::post('/deliveries/{id}/cancel', 'cancel')->middleware('can:deliveries.cancel');
+        Route::post('/deliveries/{id}/attach', 'attach')->middleware('can:deliveries.attach');
+        Route::delete('/deliveries/{id}/attach', 'detach')->middleware('can:deliveries.attach');
+        Route::put('/deliveries/{id}/deliveryman', 'assign')->middleware('can:deliveries.assign');
         Route::delete('/deliveries/{id}', 'destroy')->middleware('can:deliveries.delete');
     });
 });

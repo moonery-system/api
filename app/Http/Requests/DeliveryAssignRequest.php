@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\DeliveryStatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class DeliveryStatusRequest extends FormRequest
+class DeliveryAssignRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +24,7 @@ class DeliveryStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'status' => ['required', 'string', Rule::in(DeliveryStatusEnum::values())]
+            'delivery_man_id' => 'required|integer|exists:users,id'
         ];
     }
 }
