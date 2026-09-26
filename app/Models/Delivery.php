@@ -31,4 +31,19 @@ class Delivery extends Model
     {
         return $this->belongsTo(ClientAddress::class, 'client_address_id');
     }
+
+    public function client()
+    {
+        return $this->belongsTo(User::class, 'client_id');
+    }
+
+    public function deliveryman()
+    {
+        return $this->belongsTo(User::class, 'delivery_man_id');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(DeliveryStatus::class, 'delivery_status_id');
+    }
 }
