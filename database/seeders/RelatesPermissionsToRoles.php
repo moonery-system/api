@@ -23,7 +23,9 @@ class RelatesPermissionsToRoles extends Seeder
             $clientRole = Role::where('name', 'Client')->first();
             $clientPermissions = Permission::whereIn('permission', [
                 'clients.view',
-                'deliveries.view'
+                'deliveries.view',
+                'deliveries.viewAny',
+                'deliveries.cancel'
             ])->pluck('id');
             $clientRole->permissions()->sync($clientPermissions);
     
@@ -31,7 +33,8 @@ class RelatesPermissionsToRoles extends Seeder
             $deliveryPermissions = Permission::whereIn('permission', [
                 'deliveries.view',
                 'deliveries.viewAny',
-                'deliveries.update'
+                'deliveries.update',
+                'deliveries.attach'
             ])->pluck('id');
             $deliveryRole->permissions()->sync($deliveryPermissions);
     }
