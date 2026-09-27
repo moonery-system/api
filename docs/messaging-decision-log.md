@@ -58,3 +58,20 @@ de fato aconteceu, nada retroativo.
   Duas das tentativas (A e B, a primeira rodada) foram no-op silencioso por um erro meu de
   escape num heredoc (a mesma classe de erro do passo do `RetryPolicy`); refiz com âncora
   verificada e as mutações passaram a falhar como deviam.
+
+- **`ConsumeAssistantQueue` com o mesmo mecanismo.** `process(array $data, int
+  $priorFailures = 0)` manteve compatibilidade com os 3 testes já existentes (assinatura
+  antiga sem o segundo argumento continua funcionando). Como quase tudo já é absorvido
+  dentro do `AssistantRunner`, o único jeito de exercitar o retry aqui em teste é trocar o
+  `AssistantRunner` inteiro por um mock cujo `handle()` lança direto — é a rede de
+  segurança para falha de infraestrutura *antes* do runner (ex.: `claim()` sem banco),
+  não conserto de bug observado, como já dizia o plano.
+- **Payload sem `message_id` numérico agora vai para a DLQ**, em vez de só um "Ignoring…"
+  que não ficava em lugar nenhum — pequena melhoria de visibilidade, reaproveitando a
+  mesma `PermanentFailureException`.
+- **Verificação por mutação:** decisão de retry ignorada, payload envenenado voltando a
+  ser descartado em silêncio, e o header `x-retry-attempt` ignorado — as três primeiras
+  falharam nos testes certos de cara. A terceira (header ignorado) **sobreviveu** na
+  primeira rodada: nenhum teste chamava `process()` através do caminho que lê o header
+  (todos passavam `priorFailures` já pronto). Tornei `priorFailures(AMQPMessage)` público e
+  escrevi dois testes específicos para ele; a mutação passou a falhar como devia.
