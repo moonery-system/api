@@ -125,6 +125,23 @@ sequenceDiagram
 - **It stops** when the assistant hands off, on any failure, limit or cap (fixed fallback message plus hand-off), and when a human from support replies.
 - **Idempotent**: one row per `message_id` in `assistant_runs`, so a redelivered message never gets a second answer.
 
+<table>
+<tr>
+<td width="50%">
+
+The model answers freely from real data…
+<img src=".screenshots/support_chat_as_client.png" alt="Support chat where the assistant answers a status question with the real delivery data">
+
+</td>
+<td width="50%">
+
+…but cancelling always shows this exact, config-owned text
+<img src=".screenshots/cancel_delivery_chat_support.png" alt="Support chat showing the assistant's fixed cancellation confirmation with Confirm and Keep buttons">
+
+</td>
+</tr>
+</table>
+
 ### Configuration
 
 Keys are in `.env.example` (no values): `ASSISTANT_ENABLED`, `ASSISTANT_PROVIDER`, `ASSISTANT_MODEL`, `GEMINI_API_KEY`, `ASSISTANT_GEMINI_MIN_INTERVAL_MS`, `ASSISTANT_GEMINI_MAX_RETRIES`, `ASSISTANT_GEMINI_DAILY_CAP`; the rest are in `config/assistant.php`.
