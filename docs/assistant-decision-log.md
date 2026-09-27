@@ -170,3 +170,38 @@ encontrado, correção. Nada aqui é retroativo nem aspiracional.
   que foi o que levou à causa.
 - **Efeito no dev:** a conversa 1 ficou `handed_off/provider_failure` (encaminhamento é
   permanente na v1). O consumidor precisa ser reiniciado para carregar o código corrigido.
+
+## 2026-09-27 — mensagens fixas do bot em português, mesmo com o cliente escrevendo em inglês
+
+- **Sintoma (achado pelo usuário, num teste manual):** pediu para cancelar uma entrega em
+  inglês e recebeu `"Confirma o cancelamento da entrega MNY-2026-L7H326? Use os botões abaixo
+  para confirmar ou manter a entrega."` — em português.
+- **Causa:** as seis mensagens fixas do bot (`fallback`, `handoff`, `canceled`, `kept`,
+  `cancel_failed`, `confirm_cancel`, em `config/assistant.php`) nunca passam pelo modelo — de
+  propósito (item já registrado: com confirmação pendente, o texto é fixo, para o modelo não
+  poder dizer que cancelou algo que só perguntou). Elas nunca tiveram versão em inglês; só as
+  respostas livres do modelo seguem `resources/prompts/assistant.md` ("Reply in the customer's
+  language"), que por sua vez já tinha sido trocado de "Brazilian Portuguese by default" para
+  "US English by default" (mudança sem data neste log — feita antes desta entrada, sem registro
+  na hora; ficando registrado aqui para não faltar o porquê).
+- **Correção:** as seis mensagens fixas traduzidas para inglês. Testes ajustados: duas
+  asserções comparavam texto literal em português
+  (`tests/Feature/AssistantRunnerTest.php`, `tests/Feature/AssistantConfirmationTest.php`).
+- **Verificação:** `php artisan test --testsuite=Feature` — 143 testes, incluindo os dois
+  arquivos alterados. `composer analyse` — nível 5, zero erros.
+- **Problema (achado de novo pelo usuário, depois de eu já ter "corrigido"):** a mesma
+  mensagem em português continuou saindo depois da edição do config. Causa: o
+  `assistant-consumer` é um processo de longa duração (`restart: unless-stopped`) que estava
+  rodando havia 12 horas — ele carregou o `config/assistant.php` antigo na memória e continuou
+  usando aquele valor. Editar o arquivo no disco não afeta um `artisan` já em execução; só o
+  próximo boot lê o novo conteúdo. **Correção:** `docker compose restart assistant-consumer`.
+  **Lição:** qualquer mudança em `config/assistant.php`, no runner ou nas ferramentas exige
+  reiniciar esse serviço para valer — não é hot-reload, e nenhum teste automatizado pega isso
+  (eles instanciam o app do zero a cada execução).
+- **Achado à parte, não corrigido:** `php artisan test` (sem `--testsuite`) falha com
+  `Test directory "/var/www/./tests/Unit" not found` — `tests/Unit` nunca existiu neste
+  repositório (removido há muitos commits: `MOVING EVERYTHING TO THE ROOT`), mas o
+  `phpunit.xml` ainda declara essa suíte. Não mexi na estrutura de testes por não ser o pedido
+  e por haver trabalho em andamento no mesmo repositório (migrations de retry/DLQ). Rodar com
+  `--testsuite=Feature` (ou `--testsuite=Unit,Feature` depois de criar a pasta) até alguém
+  decidir se cria `tests/Unit` ou remove a suíte do `phpunit.xml`.

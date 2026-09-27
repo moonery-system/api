@@ -139,7 +139,7 @@ class AssistantConfirmationTest extends TestCase
         $this->confirm($this->alice, $this->pendingFor($this->alice, $delivery))->assertOk();
 
         $this->assertStringContainsString($delivery->tracking_code, $this->botMessages($this->alice)->sole()->body);
-        $this->assertStringContainsString('cancelada', $this->botMessages($this->alice)->sole()->body);
+        $this->assertStringContainsString('canceled', $this->botMessages($this->alice)->sole()->body);
     }
 
     public function test_it_can_still_be_confirmed_while_the_delivery_is_attached(): void
@@ -172,7 +172,7 @@ class AssistantConfirmationTest extends TestCase
         $this->assertSame(AssistantPendingAction::STATUS_FAILED, $fresh->status);
         $this->assertNotNull($fresh->error);
 
-        $this->assertStringContainsString('não consegui', mb_strtolower($this->botMessages($this->alice)->sole()->body));
+        $this->assertStringContainsString("couldn't cancel", mb_strtolower($this->botMessages($this->alice)->sole()->body));
     }
 
     public function pastPickup(): array
@@ -251,7 +251,7 @@ class AssistantConfirmationTest extends TestCase
 
         $this->assertSame('pending', $this->statusOf($delivery));
         $this->assertSame(AssistantPendingAction::STATUS_REJECTED, $action->fresh()->status);
-        $this->assertStringContainsString('mantive', $this->botMessages($this->alice)->sole()->body);
+        $this->assertStringContainsString('kept', $this->botMessages($this->alice)->sole()->body);
 
         // And it can no longer be confirmed.
         $this->confirm($this->alice, $action)->assertStatus(409);

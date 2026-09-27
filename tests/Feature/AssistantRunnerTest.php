@@ -565,10 +565,10 @@ class AssistantRunnerTest extends TestCase
         ]));
 
         $conversation = $this->conversationOf($this->alice);
-        $this->process($this->say($this->alice, $conversation, 'quero cancelar'));
+        $this->process($this->say($this->alice, $conversation, 'I want to cancel it'));
 
         $reply = $this->botReplies($conversation)->sole();
-        $this->assertStringContainsString("Confirma o cancelamento da entrega {$mine->tracking_code}?", $reply->body);
+        $this->assertStringContainsString("Do you confirm canceling delivery {$mine->tracking_code}?", $reply->body);
         $this->assertSame($mine->id, $reply->delivery_id);
 
         $action = AssistantPendingAction::sole();

@@ -48,13 +48,13 @@ return [
     'confirmation_ttl_minutes' => (int) env('ASSISTANT_CONFIRMATION_TTL_MINUTES', 10),
 
     'messages' => [
-        'fallback' => 'Não consegui resolver isso agora. Encaminhei a sua conversa ao Suporte, que responde em breve.',
-        'handoff' => 'Vou encaminhar a sua conversa ao Suporte, que responde em breve.',
+        'fallback' => "I couldn't sort this out right now. I've forwarded your conversation to Support, who will reply shortly.",
+        'handoff' => "I'll forward your conversation to Support, who will reply shortly.",
         // :tracking_code is replaced by the code of the delivery.
-        'canceled' => 'Pronto, a entrega :tracking_code foi cancelada.',
-        'kept' => 'Tudo bem, mantive a entrega :tracking_code.',
-        'cancel_failed' => 'Não consegui cancelar a entrega :tracking_code porque o status dela mudou. Se precisar, fale com o Suporte.',
-        'confirm_cancel' => 'Confirma o cancelamento da entrega :tracking_code? Use os botões abaixo para confirmar ou manter a entrega.',
+        'canceled' => 'Done, delivery :tracking_code has been canceled.',
+        'kept' => "No problem, I kept delivery :tracking_code as it was.",
+        'cancel_failed' => "I couldn't cancel delivery :tracking_code because its status changed. Reach out to Support if you need help.",
+        'confirm_cancel' => 'Do you confirm canceling delivery :tracking_code? Use the buttons below to confirm or keep the delivery.',
     ],
 
     /*
