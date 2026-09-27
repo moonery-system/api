@@ -75,3 +75,30 @@ de fato aconteceu, nada retroativo.
   primeira rodada: nenhum teste chamava `process()` através do caminho que lê o header
   (todos passavam `priorFailures` já pronto). Tornei `priorFailures(AMQPMessage)` público e
   escrevi dois testes específicos para ele; a mutação passou a falhar como devia.
+
+- **`customs:dlq:list/replay/check`** (`App\Messaging\DlqInspector`, canal cru — não dá
+  para testar sem broker). `{queue}` aceita `emails`/`assistant`; para o assistente a
+  routing key de replay é fixa (`assistant.requests`), porque o envelope da DLQ dele não
+  guarda uma (só existe uma rota possível).
+- **Achado no phpstan:** o larastan interpreta `--` dentro da descrição de um argumento de
+  `$signature` como início de outra opção, e reprova `$this->argument('queue')` com "does
+  not have argument". Troquei o texto da descrição para não usar `--`.
+- **Bug real, achado só ao testar contra o broker (não pego por unidade, como o plano já
+  previa):** `dlq:list` mostrava a **mesma** mensagem repetida até o `--limit`, quando a
+  fila tinha menos mensagens que o limite (testei com 1 mensagem e `--limit=20`: apareceu
+  20 vezes). Causa: `peek()` fazia `basic_get` → `nack(requeue: true)` **dentro do mesmo
+  laço**, e o `nack` devolve a mensagem para a **frente** da fila antes da próxima
+  iteração, então o próximo `basic_get` repescava ela mesma. `replay()` tinha a mesma
+  falha, mais grave: uma entrada malformada devolvida por `nack` no meio do laço seria
+  repescada para sempre, sem nunca alcançar as outras. **Correção:** buscar tudo primeiro
+  (`take()`) — uma mensagem ainda não confirmada não é reentregue no mesmo canal, então
+  cada `basic_get` já devolve uma distinta — e só depois decidir/devolver cada uma.
+  Reverifiquei ao vivo com 3 mensagens distintas: `list` passou a mostrar as 3 (e repetir
+  a listagem não muda nada), `replay --limit=1` tirou uma só, `replay --all` tirou as
+  outras duas, e o `dlq:check` refletiu a profundidade certa em cada passo.
+- **Roteiro de caos rodado de verdade** (autorizado): parei o Mailpit, criei um usuário e
+  convite descartáveis, vi a falha real (`Connection could not be established with host
+  "mailpit"`) cair no patamar 1. Religuei o Mailpit — a 2ª tentativa ainda falhou (o DNS do
+  Docker para o serviço recém-reiniciado ainda não tinha propagado; não é bug do código),
+  e a 3ª (patamar 2, ~30s depois) chegou: `Handled invites.email`, e-mail encontrado no
+  Mailpit, `email_sent_at` carimbado. Apaguei o usuário e o convite de teste ao final.
