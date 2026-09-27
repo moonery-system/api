@@ -35,4 +35,9 @@ class InviteRepository implements InviteInterface
             ->where('expires_at', '>', Carbon::now())
             ->update(['expires_at' => Carbon::now()]);
     }
+
+    public function markEmailSent(int $inviteId): void
+    {
+        Invite::where('id', $inviteId)->update(['email_sent_at' => Carbon::now()]);
+    }
 }

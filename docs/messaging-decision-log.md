@@ -36,3 +36,8 @@ de fato aconteceu, nada retroativo.
   subir, antes de qualquer coisa poder falhar). Refiz com a ordem certa e a mensagem voltou
   para `zz.probe.queue` depois dos 5s. Apaguei as 5 filas de sondagem ao final
   (`rabbitmqctl delete_queue`); as 4 filas do projeto não foram tocadas.
+
+- **Marcas de idempotência:** `invites.email_sent_at` (separada de `used_at`, que é outra
+  coisa: o convidado clicou o link) e `user_notifications.emailed_at` (por destinatário,
+  ao lado de `read_at`). Migrations aditivas rodadas no banco de dev com autorização
+  explícita — só adicionam coluna nullable, nenhum dado tocado.

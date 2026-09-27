@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\NotificationInterface;
 use App\Models\Notification;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -62,5 +64,26 @@ class NotificationRepository implements NotificationInterface
         $pivot->whereNull('read_at')->update(['read_at' => Carbon::now()]);
 
         return true;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function usersPendingEmail(int $notificationId): Collection
+    {
+        return User::query()
+            ->join('user_notifications', 'user_notifications.user_id', '=', 'users.id')
+            ->where('user_notifications.notification_id', $notificationId)
+            ->whereNull('user_notifications.emailed_at')
+            ->select('users.*')
+            ->get();
+    }
+
+    public function markEmailed(int $notificationId, int $userId): void
+    {
+        DB::table('user_notifications')
+            ->where('notification_id', $notificationId)
+            ->where('user_id', $userId)
+            ->update(['emailed_at' => Carbon::now()]);
     }
 }

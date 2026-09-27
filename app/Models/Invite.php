@@ -17,10 +17,12 @@ class Invite extends Model
         'user_id',
         'expires_at',
         'used_at',
+        'email_sent_at',
     ];
 
     protected $casts = [
         'expires_at' => 'datetime',
+        'email_sent_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
