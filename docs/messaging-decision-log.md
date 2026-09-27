@@ -102,3 +102,33 @@ de fato aconteceu, nada retroativo.
   Docker para o serviço recém-reiniciado ainda não tinha propagado; não é bug do código),
   e a 3ª (patamar 2, ~30s depois) chegou: `Handled invites.email`, e-mail encontrado no
   Mailpit, `email_sent_at` carimbado. Apaguei o usuário e o convite de teste ao final.
+
+## 2026-09-27 — websocket-api (Hyperf)
+
+- **`App\Amqp\DeadLetterPublisher`** pega um canal cru via `ConnectionFactory` (mesmo
+  padrão do lado Laravel), **sem passar pelo `Producer` do Hyperf**: `Producer::produce()`
+  sempre tenta declarar a exchange na primeira vez, e a exchange sem nome (a que a
+  publicação direta numa fila usa) é reservada — o RabbitMQ recusa um `exchange.declare`
+  explícito para ela. Confirmado lendo o vendor (`Builder::declare()`), não só por teoria.
+- **`ChatMessageConsumer`/`WebsocketNotificationConsumer`** ganharam `try/catch`: uma
+  exceção publica na `.dlq` correspondente, loga estruturado e devolve `Result::DROP`
+  (igual a hoje — nenhuma mudança na fila principal). Sem escada de retry aqui: não existe
+  falha transitória plausível em empurrar para um WebSocket, e destinatário offline já não
+  chega a esse ponto (`Result::DROP` de registro-não-encontrado continua igual).
+- **`websocket-api` não tem suíte**, então tudo foi verificado ao vivo contra o broker:
+  - Tentativa de rodar o `DeadLetterPublisher` num script avulso (fora do servidor) deu
+    `Swoole\Error: API must be called in the coroutine` — o AMQP do Hyperf exige contexto
+    de corrotina. Envolvendo em `Swoole\Coroutine\run()` o publish funcionou, mas o
+    processo **nunca terminou sozinho** (a conexão do Hyperf sobe corrotinas de
+    heartbeat/leitura em segundo plano que não são canceladas) — matei o processo à força e
+    apaguei a fila de sondagem que ele criou.
+  - **Verificação real, através do servidor Hyperf já rodando** (reiniciado para carregar o
+    código): publiquei `chat.messages` com `recipient_ids` como string (viola o tipo
+    `array` de `WebSocketService::sendToUserIds`) → `TypeError` capturado, registrado em
+    `runtime/logs/hyperf.log` (não no stdout — a armadilha já documentada) e publicado em
+    `chat.queue.websocket.dlq`. Publiquei `notifications.websocket` com `notification_id`
+    como array (viola o tipo `int` de `NotificationRepository::findById`) → mesmo
+    resultado em `notifications.queue.websocket.dlq`.
+  - Reenviei uma `chat.messages` bem formada depois: processou normal (log de SQL comum,
+    sem erro), confirmando que o caminho feliz não regrediu. Limpei as duas DLQs de teste
+    (`rabbitmqctl purge_queue`) ao final.
