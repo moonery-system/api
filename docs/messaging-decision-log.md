@@ -20,3 +20,19 @@ de fato aconteceu, nada retroativo.
   mudança real) e os testes passaram por isso, não porque a lógica resistisse; refiz com um
   `replace` que confirma a âncora antes de gravar, e aí sim os dois testes esperados
   falharam. Registro isso porque quase virou um falso positivo na verificação.
+
+- **`RabbitMQPublisher::publishToQueue()`** (exchange padrão, routing key = nome da fila) e
+  **`RabbitMQConsumer::declareRetryLadder()`** (3 filas de espera + DLQ por fila principal).
+  `FakeRabbitMQPublisher` ganhou o espelho (`$publishedToQueue`). `config/messaging.php` com
+  os 3 patamares (5s/30s/5min, env-configurável).
+- **Verificado contra o broker real** (não dá para testar isso sem I/O): declarei uma fila
+  de sondagem (`zz.probe.queue` + patamares), publiquei na `.retry.1` e confirmei via
+  `rabbitmqctl list_queues … arguments` que os argumentos batem
+  (`x-message-ttl`/`x-dead-letter-exchange`/`x-dead-letter-routing-key`). **Achado no
+  processo:** minha primeira tentativa declarou a fila principal DEPOIS de publicar na
+  fila de retry — a mensagem expirou e dead-letterou para uma fila que ainda não existia,
+  e se perdeu (exchange padrão descarta em silêncio se o destino não existe). Não é bug do
+  código: no fluxo real a fila principal já existe (é o próprio consumidor que a declara ao
+  subir, antes de qualquer coisa poder falhar). Refiz com a ordem certa e a mensagem voltou
+  para `zz.probe.queue` depois dos 5s. Apaguei as 5 filas de sondagem ao final
+  (`rabbitmqctl delete_queue`); as 4 filas do projeto não foram tocadas.

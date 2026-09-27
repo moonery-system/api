@@ -5,6 +5,7 @@ namespace App\Services;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Wire\AMQPTable;
 
 class RabbitMQPublisher
 {
@@ -47,6 +48,29 @@ class RabbitMQPublisher
             'delivery.events',
             $routingKey
         );
+    }
+
+    /**
+     * Publishes straight to a named queue, bypassing delivery.events entirely: the
+     * nameless (default) exchange routes a message to the queue whose name equals the
+     * routing key, with no binding needed. This is how a message goes onto a retry-tier
+     * queue or a dead-letter queue -- both are addressed by name, not by topic.
+     *
+     * @param array<string, int|string> $headers plain AMQP headers, e.g. x-retry-attempt
+     */
+    public function publishToQueue(string $queue, array $data, array $headers = []): void
+    {
+        $this->connect();
+
+        $properties = ['content_type' => 'application/json', 'delivery_mode' => 2];
+
+        if ($headers) {
+            $properties['application_headers'] = new AMQPTable($headers);
+        }
+
+        $message = new AMQPMessage(json_encode($data), $properties);
+
+        $this->channel->basic_publish($message, '', $queue);
     }
 
     public function __destruct()
