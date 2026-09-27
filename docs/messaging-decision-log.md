@@ -41,3 +41,20 @@ de fato aconteceu, nada retroativo.
   coisa: o convidado clicou o link) e `user_notifications.emailed_at` (por destinatário,
   ao lado de `read_at`). Migrations aditivas rodadas no banco de dev com autorização
   explícita — só adicionam coluna nullable, nenhum dado tocado.
+
+- **`ConsumeEmailQueue` reescrito.** `process(AMQPMessage): string` público, sem console
+  nem canal — a lição da flag de header (seção "o que encontrei") virou o teste
+  `test_the_original_routing_key_survives_the_bounce_through_a_retry_queue`. Payload que
+  não é JSON válido e routing key desconhecida vão direto para a DLQ, sem gastar patamar.
+  Entrega/notificação inexistente e payload sem o id esperado seguem como no-op silencioso
+  (decisão registrada no plano: não é bug, é escopo — "sem overengineering" para um caso
+  que praticamente não acontece na prática, dado que o convite é criado antes de publicar).
+- **Problema (meu):** os handlers ainda chamavam `$this->info(...)`, que exige console —
+  quebrou toda chamada direta a `process()` em teste ("Call to a member function writeln()
+  on null"), a mesma armadilha já documentada no assistente. Troquei por `Log::info`.
+- **Verificação por mutação:** cinco garantias centrais — preferir o header de routing key,
+  filtrar só destinatário pendente, checar `email_sent_at`, validar JSON, e respeitar a
+  decisão do `RetryPolicy` — cada uma removida uma de cada vez; todas quebram o teste certo.
+  Duas das tentativas (A e B, a primeira rodada) foram no-op silencioso por um erro meu de
+  escape num heredoc (a mesma classe de erro do passo do `RetryPolicy`); refiz com âncora
+  verificada e as mutações passaram a falhar como deviam.

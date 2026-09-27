@@ -30,6 +30,7 @@ use App\Repositories\RoleRepository;
 use App\Repositories\UserRepository;
 use App\Assistant\AssistantBot;
 use App\Assistant\Llm\GeminiLlmClient;
+use App\Messaging\RetryPolicy;
 use App\Assistant\Llm\GuardedLlmClient;
 use App\Assistant\Llm\LlmClient;
 use App\Assistant\Tools\CanCancelDeliveryTool;
@@ -53,6 +54,8 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(AssistantBot::class);
+
+        $this->app->singleton(RetryPolicy::class, fn($app) => new RetryPolicy(config('messaging.retry.tiers_ms')));
 
         $this->app->singleton(SystemClock::class);
         $this->app->bind(Clock::class, SystemClock::class);
